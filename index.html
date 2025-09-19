@@ -23,7 +23,9 @@
   </button>
 
   <script>
-    const API_KEY = "0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006";
+    const API_KEY_STORMGlass = "0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006"; // REMPLACEZ CETTE VALEUR
+    const API_KEY_WorldTides = "190f6e2f-4a39-4645-8926-17b57688273b"; // CLÉ WORLD TIDES
+
     const spots = [
       { id: 'yoff', name: "Yoff", lat: 14.765, lon: -17.485 },
       { id: 'almadies', name: "Les Almadies", lat: 14.741, lon: -17.531 },
@@ -41,18 +43,18 @@
       </svg>`;
     }
 
-    async function fetchSpots() {
+    async function fetchAllData() {
       const container = document.getElementById("spots");
       container.innerHTML = "<p class='col-span-3 text-center'>Chargement des données...</p>";
       const tideDiv = document.getElementById("tides");
       tideDiv.innerHTML = "<p class='text-center'>Chargement des marées...</p>";
 
-      // Fetch spot data
+      // Fetch spot data from Stormglass.io
       const spotData = await Promise.all(spots.map(async (spot) => {
           try {
               const url = `https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=swellHeight,swellPeriod,windWaveHeight,windWavePeriod,windDirection,windSpeed`;
               const res = await fetch(url, {
-                  headers: { 'Authorization': API_KEY }
+                  headers: { 'Authorization': API_KEY_STORMGlass }
               });
 
               if (!res.ok) {
@@ -64,16 +66,9 @@
                   throw new Error("Données horaires non disponibles");
               }
               
-              const h = data.hours[0]; // Current hour data
-
-              // Gestion des données manquantes avec l'opérateur ?.
-              const swellHeight = h.swellHeight?.value || 0;
-              const windWaveHeight = h.windWaveHeight?.value || 0;
-              const swellPeriod = h.swellPeriod?.value || 0;
-              const windWavePeriod = h.windWavePeriod?.value || 0;
-
-              const waveHeight = swellHeight + windWaveHeight;
-              const wavePeriod = swellPeriod + windWavePeriod;
+              const h = data.hours[0];
+              const waveHeight = (h.swellHeight?.value || 0) + (h.windWaveHeight?.value || 0);
+              const wavePeriod = (h.swellPeriod?.value || 0) + (h.windWavePeriod?.value || 0);
               const windSpeed = h.windSpeed?.value || 0;
               const windDir = h.windDirection?.value || 0;
               
@@ -130,30 +125,34 @@
           }
       });
 
-      // Fetch tide data (separate API call)
+      // Fetch tide data from WorldTides.info
       try {
-          const tideUrl = `https://api.stormglass.io/v2/tide/sea-level/point?lat=14.66&lng=-17.43`;
-          const res = await fetch(tideUrl, {
-              headers: { 'Authorization': API_KEY }
-          });
+          const today = new Date().toISOString().split('T')[0];
+          const tideUrl = `https://www.worldtides.info/api?extremes&lat=14.66&lon=-17.43&key=${API_KEY_WorldTides}&date=${today}`;
+
+          const res = await fetch(tideUrl);
 
           if (!res.ok) {
               throw new Error(`Erreur de l'API: ${res.status}`);
           }
           const data = await res.json();
-          const levels = data.data;
 
+          if (!data.extremes || data.extremes.length === 0) {
+              throw new Error("Données de marée non disponibles");
+          }
+
+          const extremes = data.extremes;
           const now = new Date();
           let nextHigh = null, nextLow = null;
 
-          for (let i = 1; i < levels.length - 1; i++) {
-              const currentTime = new Date(levels[i].time);
-              if (currentTime > now) {
-                  if (levels[i].value > levels[i - 1].value && levels[i].value > levels[i + 1].value && !nextHigh) {
-                      nextHigh = { time: levels[i].time, val: levels[i].value };
-                  }
-                  if (levels[i].value < levels[i - 1].value && levels[i].value < levels[i + 1].value && !nextLow) {
-                      nextLow = { time: levels[i].time, val: levels[i].value };
+          // Find next high and low tides
+          for (const extreme of extremes) {
+              const extremeTime = new Date(extreme.dt * 1000); // Convert Unix timestamp to milliseconds
+              if (extremeTime > now) {
+                  if (extreme.type === 'High' && !nextHigh) {
+                      nextHigh = { time: extremeTime, val: extreme.height };
+                  } else if (extreme.type === 'Low' && !nextLow) {
+                      nextLow = { time: extremeTime, val: extreme.height };
                   }
               }
               if (nextHigh && nextLow) break;
@@ -169,8 +168,8 @@
       }
     }
 
-    document.getElementById("refreshBtn").addEventListener("click", fetchSpots);
-    fetchSpots();
+    document.getElementById("refreshBtn").addEventListener("click", fetchAllData);
+    fetchAllData();
   </script>
 </body>
 </html>
