@@ -46,7 +46,8 @@
 
       const spotData = await Promise.all(spots.map(async (spot) => {
           try {
-              const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wave_direction,wind_speed_10m,wind_direction_10m&timezone=auto`;
+              // Correction ici : wave_period -> swell_period
+              const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,swell_period,wave_direction,wind_speed_10m,wind_direction_10m&timezone=auto`;
               const res = await fetch(url);
               const data = await res.json();
               if (!data.hourly) throw new Error("Données horaires non disponibles");
@@ -70,7 +71,7 @@
           const h = spot.data;
           const current = {
               height: h.wave_height[0],
-              period: h.wave_period[0],
+              period: h.swell_period[0], // Correction ici
               windSpeed: h.wind_speed_10m[0] * 3.6,
               windDir: h.wind_direction_10m[0]
           };
@@ -146,4 +147,3 @@
   </script>
 </body>
 </html>
-```
