@@ -6,7 +6,7 @@
   <title>Surf Spots Dakar — Live</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background:#f0f9ff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto; }
+    body { background:#f0f9ff; font-family: Inter, ui-sans-serif, system-ui, -apple-sytem, 'Segoe UI', Roboto; }
     .arrow { display:inline-block; width:36px; height:36px; transform-origin: center center; transition: transform 0.4s ease; }
     .spot-card { min-height:220px; }
   </style>
@@ -54,7 +54,7 @@
       // Fetch spot data from Open-Meteo Marine API
       const spotData = await Promise.all(spots.map(async (spot) => {
           try {
-              const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wind_wave_height,wind_wave_period,wind_speed_10m,wind_direction_10m&timezone=Africa%2FCasablanca`;
+              const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wind_speed_10m,wind_direction_10m&timezone=Africa%2FCasablanca`;
               const res = await fetch(url);
               
               if (!res.ok) {
@@ -70,8 +70,7 @@
               const nowIndex = data.hourly.time.findIndex(time => new Date(time) >= new Date());
               const h = data.hourly;
               
-              // Note: Open-Meteo separates different types of waves. We'll use the combined value.
-              const waveHeight = (h.wave_height[nowIndex] || 0) + (h.wind_wave_height[nowIndex] || 0);
+              const waveHeight = (h.wave_height[nowIndex] || 0);
               const wavePeriod = (h.wave_period[nowIndex] || 0);
               const windSpeed = h.wind_speed_10m[nowIndex] || 0;
               const windDir = h.wind_direction_10m[nowIndex] || 0;
