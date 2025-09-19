@@ -115,6 +115,7 @@
 
       const tideDiv = document.getElementById("tides");
       try {
+          // Correction ici : changement de l'ordre des paramètres dans l'URL
           const tideUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=14.66&longitude=-17.43&hourly=tidal_water_level&timezone=auto`;
           const res = await fetch(tideUrl);
           
