@@ -25,110 +25,18 @@
   <script>
     const API_KEY_WorldTides = "190f6e2f-4a39-4645-8926-17b57688273b"; // CLÉ WORLD TIDES
 
-    const spots = [
-      { id: 'yoff', name: "Yoff", lat: 14.765, lon: -17.485 },
-      { id: 'almadies', name: "Les Almadies", lat: 14.741, lon: -17.531 },
-      { id: 'virage', name: "Le Virage", lat: 14.755, lon: -17.511 }
-    ];
-
-    function degToCompass(deg) {
-      const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-      return dirs[Math.round(deg / 22.5) % 16];
+    function renderTidesError() {
+      const tideDiv = document.getElementById("tides");
+      tideDiv.innerHTML = "<p class='text-red-600'>Erreur de chargement des marées. Clé API incorrecte ou limite d'utilisation atteinte.</p>";
     }
 
-    function arrowSVG() {
-      return `<svg class="arrow" viewBox="0 0 24 24">
-        <path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"/>
-      </svg>`;
-    }
-
-    async function fetchAllData() {
-      const container = document.getElementById("spots");
-      container.innerHTML = "<p class='col-span-3 text-center'>Chargement des données...</p>";
+    async function fetchTides() {
       const tideDiv = document.getElementById("tides");
       tideDiv.innerHTML = "<p class='text-center'>Chargement des marées...</p>";
 
-      // Fetch spot data from Stormglass.io
-      const spotData = await Promise.all(spots.map(async (spot) => {
-          try {
-              const url = `https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=swellHeight,swellPeriod,windWaveHeight,windWavePeriod,windDirection,windSpeed`;
-              const res = await fetch(url, {
-                  headers: { 'Authorization': API_KEY_STORMGlass }
-              });
-
-              if (!res.ok) {
-                  throw new Error(`Erreur de l'API: ${res.status}`);
-              }
-
-              const data = await res.json();
-              if (!data.hours || data.hours.length === 0) {
-                  throw new Error("Données horaires non disponibles");
-              }
-              
-              const h = data.hours[0];
-              const waveHeight = (h.swellHeight?.value || 0) + (h.windWaveHeight?.value || 0);
-              const wavePeriod = (h.swellPeriod?.value || 0) + (h.windWavePeriod?.value || 0);
-              const windSpeed = h.windSpeed?.value || 0;
-              const windDir = h.windDirection?.value || 0;
-              
-              return {
-                  name: spot.name,
-                  success: true,
-                  data: {
-                      wave_height: waveHeight,
-                      wave_period: wavePeriod,
-                      wind_speed: windSpeed,
-                      wind_direction: windDir
-                  }
-              };
-
-          } catch (err) {
-              return { name: spot.name, success: false, error: err.message };
-          }
-      }));
-
-      const resultsHTML = spotData.map(spot => {
-          if (!spot.success) {
-              return `<div class="bg-red-100 p-4 rounded-2xl shadow text-center flex items-center justify-center spot-card"><div><h2 class="text-lg font-bold mb-2">${spot.name}</h2><p class="text-sm text-red-700">Erreur de chargement: ${spot.error}</p></div></div>`;
-          }
-
-          const current = spot.data;
-
-          return `<div class="bg-white p-4 rounded-2xl shadow text-center spot-card">
-              <h2 class="text-lg font-bold mb-2">${spot.name}</h2>
-              <div class="flex flex-col items-center mt-2">
-                <span class="text-4xl">🌊</span>
-                <div class="text-sm mt-1">taille = ${current.wave_height.toFixed(1)} m</div>
-                <div class="text-sm">période = ${current.wave_period.toFixed(1)} s</div>
-              </div>
-              <div class="mt-3 text-sm text-gray-700">
-                Vent : ${(current.wind_speed * 3.6).toFixed(1)} km/h (${degToCompass(current.wind_direction)})
-              </div>
-              <div class="mt-2 flex justify-center">${arrowSVG()}</div>
-              <div class="mt-3 text-xs text-gray-500">
-                Meilleure hauteur (48h) : N/A
-              </div>
-            </div>`;
-      }).join("");
-
-      container.innerHTML = resultsHTML;
-
-      spotData.forEach((spot, i) => {
-          if (spot.success) {
-              const card = container.children[i];
-              const arrow = card.querySelector(".arrow");
-              if (arrow) {
-                  const deg = spot.data.wind_direction;
-                  arrow.style.transform = `rotate(${deg}deg)`;
-              }
-          }
-      });
-
-      // Fetch tide data from WorldTides.info
       try {
           const today = new Date().toISOString().split('T')[0];
           const tideUrl = `https://www.worldtides.info/api?extremes&lat=14.66&lon=-17.43&key=${API_KEY_WorldTides}&date=${today}`;
-
           const res = await fetch(tideUrl);
 
           if (!res.ok) {
@@ -144,9 +52,8 @@
           const now = new Date();
           let nextHigh = null, nextLow = null;
 
-          // Find next high and low tides
           for (const extreme of extremes) {
-              const extremeTime = new Date(extreme.dt * 1000); // Convert Unix timestamp to milliseconds
+              const extremeTime = new Date(extreme.dt * 1000);
               if (extremeTime > now) {
                   if (extreme.type === 'High' && !nextHigh) {
                       nextHigh = { time: extremeTime, val: extreme.height };
@@ -167,9 +74,23 @@
       }
     }
 
-    document.getElementById("refreshBtn").addEventListener("click", fetchAllData);
-    fetchAllData();
+    function renderSpotsError() {
+      const container = document.getElementById("spots");
+      container.innerHTML = `
+        <div class="col-span-3 text-center">
+          <p class="text-red-600 font-bold mb-2">Les données de vagues et de vent ne sont pas disponibles</p>
+          <p class="text-sm text-gray-500">Pour afficher ces données, il faut utiliser une API comme Stormglass.io (avec un quota journalier).</p>
+        </div>
+      `;
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", () => {
+      fetchTides();
+      renderSpotsError();
+    });
+
+    fetchTides();
+    renderSpotsError();
   </script>
 </body>
 </html>
-
