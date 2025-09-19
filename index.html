@@ -23,7 +23,7 @@
   </button>
 
   <script>
-    const API_KEY = "0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006"; // REMPLACEZ PAR VOTRE CLÉ API STORMGlass
+    const API_KEY = "0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006";
     const spots = [
       { id: 'yoff', name: "Yoff", lat: 14.765, lon: -17.485 },
       { id: 'almadies', name: "Les Almadies", lat: 14.741, lon: -17.531 },
@@ -60,12 +60,22 @@
               }
 
               const data = await res.json();
+              if (!data.hours || data.hours.length === 0) {
+                  throw new Error("Données horaires non disponibles");
+              }
+              
               const h = data.hours[0]; // Current hour data
 
-              const waveHeight = h.swellHeight ? (h.swellHeight.value + h.windWaveHeight.value) : (h.windWaveHeight ? h.windWaveHeight.value : 0);
-              const wavePeriod = h.swellPeriod ? (h.swellPeriod.value + h.windWavePeriod.value) / 2 : (h.windWavePeriod ? h.windWavePeriod.value : 0);
-              const windSpeed = h.windSpeed ? h.windSpeed.value : 0;
-              const windDir = h.windDirection ? h.windDirection.value : 0;
+              // Gestion des données manquantes avec l'opérateur ?.
+              const swellHeight = h.swellHeight?.value || 0;
+              const windWaveHeight = h.windWaveHeight?.value || 0;
+              const swellPeriod = h.swellPeriod?.value || 0;
+              const windWavePeriod = h.windWavePeriod?.value || 0;
+
+              const waveHeight = swellHeight + windWaveHeight;
+              const wavePeriod = swellPeriod + windWavePeriod;
+              const windSpeed = h.windSpeed?.value || 0;
+              const windDir = h.windDirection?.value || 0;
               
               return {
                   name: spot.name,
