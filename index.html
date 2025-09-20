@@ -52,11 +52,7 @@
   </button>
 
   <script>
-    const API_KEYS_STORMGlass = ["0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006", "8a48d324-95a8-11f0-b0b8-0242ac130006-8a48d3e2-95a8-11f0-b0b8-0242ac130006"];
-    const API_KEY_OPENWEATHER = "cff19fb0cabc814c8a5eadc002ab9cbf"; // Clé pour l'API One Call
     const API_KEY_WorldTides = "0278aae2-48dd-421e-82d6-421baaa31786";
-
-    let currentStormglassKeyIndex = 0;
 
     const spots = [
       { id: 'yoff', name: "Yoff", lat: 14.765, lon: -17.485 },
@@ -79,7 +75,14 @@
     }
     
     function getWeatherIcon(iconCode) {
-        return `http://openweathermap.org/img/wn/${iconCode}@2x.png`;
+        const iconMap = {
+            '01d': '☀️', '01n': '🌙', '02d': '🌤️', '02n': '☁️',
+            '03d': '☁️', '03n': '☁️', '04d': '🌥️', '04n': '🌥️',
+            '09d': '🌧️', '09n': '🌧️', '10d': '🌦️', '10n': '🌧️',
+            '11d': '⛈️', '11n': '⛈️', '13d': '🌨️', '13n': '🌨️',
+            '50d': '🌫️', '50n': '🌫️'
+        };
+        return iconMap[iconCode] || '❓';
     }
 
     async function fetchWeatherData() {
@@ -92,28 +95,30 @@
       const dakarLon = -17.3660;
 
       try {
-        const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${dakarLat}&lon=${dakarLon}&exclude=minutely,alerts&appid=${API_KEY_OPENWEATHER}&units=metric&lang=fr`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${dakarLat}&longitude=${dakarLon}&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Africa%2FCasablanca`;
         const res = await fetch(url);
         if (!res.ok) {
-          throw new Error(`Erreur de l'API OpenWeather: ${res.status}`);
+          throw new Error(`Erreur de l'API Open-Meteo: ${res.status}`);
         }
         const data = await res.json();
         
         // Aujourd'hui
-        const current = data.current;
+        const currentHourIndex = data.hourly.time.findIndex(time => new Date(time) >= new Date());
         const todayForecast = data.daily[0];
+        const currentHourData = data.hourly.temperature_2m[currentHourIndex];
+        
         todayDiv.innerHTML = `
           <h2 class="text-xl font-bold mb-2">Aujourd'hui</h2>
           <div class="flex items-center space-x-4">
-            <img src="${getWeatherIcon(current.weather[0].icon)}" alt="${current.weather[0].description}" class="w-16 h-16"/>
+            <span class="text-4xl">${getWeatherIcon(data.hourly.weather_code[currentHourIndex])}</span>
             <div>
-              <p class="text-3xl font-bold">${current.temp.toFixed(0)}°C</p>
-              <p class="text-sm capitalize">${current.weather[0].description}</p>
+              <p class="text-3xl font-bold">${currentHourData.toFixed(0)}°C</p>
+              <p class="text-sm capitalize">${getWeatherDescription(data.hourly.weather_code[currentHourIndex])}</p>
             </div>
           </div>
           <div class="mt-4 text-xs">
-              <p>Min : ${todayForecast.temp.min.toFixed(0)}°C | Max : ${todayForecast.temp.max.toFixed(0)}°C</p>
-              <p>Vent : ${(current.wind_speed * 3.6).toFixed(0)} km/h (${degToCompass(current.wind_deg)})</p>
+              <p>Min : ${todayForecast.temperature_2m_min.toFixed(0)}°C | Max : ${todayForecast.temperature_2m_max.toFixed(0)}°C</p>
+              <p>Vent : ${(data.hourly.wind_speed_10m[currentHourIndex] * 3.6).toFixed(0)} km/h (${degToCompass(data.hourly.wind_direction_10m[currentHourIndex])})</p>
           </div>
         `;
         
@@ -122,32 +127,28 @@
         tomorrowDiv.innerHTML = `
           <h2 class="text-xl font-bold mb-2">Demain</h2>
           <div class="flex items-center space-x-4">
-            <img src="${getWeatherIcon(tomorrowForecast.weather[0].icon)}" alt="${tomorrowForecast.weather[0].description}" class="w-16 h-16"/>
+            <span class="text-4xl">${getWeatherIcon(tomorrowForecast.weather_code)}</span>
             <div>
-              <p class="text-3xl font-bold">${tomorrowForecast.temp.day.toFixed(0)}°C</p>
-              <p class="text-sm capitalize">${tomorrowForecast.weather[0].description}</p>
+              <p class="text-3xl font-bold">${tomorrowForecast.temperature_2m_max.toFixed(0)}°C</p>
+              <p class="text-sm capitalize">${getWeatherDescription(tomorrowForecast.weather_code)}</p>
             </div>
           </div>
           <div class="mt-4 text-xs">
-              <p>Min : ${tomorrowForecast.temp.min.toFixed(0)}°C | Max : ${tomorrowForecast.temp.max.toFixed(0)}°C</p>
-              <p>Vent : ${(tomorrowForecast.wind_speed * 3.6).toFixed(0)} km/h (${degToCompass(tomorrowForecast.wind_deg)})</p>
+              <p>Min : ${tomorrowForecast.temperature_2m_min.toFixed(0)}°C | Max : ${tomorrowForecast.temperature_2m_max.toFixed(0)}°C</p>
+              <p>Vent : N/A</p>
           </div>
         `;
 
         // Prévisions horaires (prochaines 24h)
         let hourlyHtml = '<h3 class="text-md font-bold mb-2">Prochaines heures</h3><div class="flex overflow-x-auto space-x-4 pb-2">';
-        const now = new Date();
-        const startHour = now.getHours();
-        
         for (let i = 0; i < 24; i++) {
-          const hourData = data.hourly[i];
-          const hour = (startHour + i) % 24;
-          const time = `${String(hour).padStart(2, '0')}:00`;
+          const hourData = data.hourly;
+          const time = new Date(hourData.time[currentHourIndex + i]).getHours();
           hourlyHtml += `
             <div class="text-center flex-shrink-0">
-              <p class="text-sm">${time}</p>
-              <img src="${getWeatherIcon(hourData.weather[0].icon)}" alt="" class="w-8 h-8 mx-auto"/>
-              <p class="text-xs">${hourData.temp.toFixed(0)}°C</p>
+              <p class="text-sm">${time}:00</p>
+              <span class="text-xl">${getWeatherIcon(hourData.weather_code[currentHourIndex + i])}</span>
+              <p class="text-xs">${hourData.temperature_2m[currentHourIndex + i].toFixed(0)}°C</p>
             </div>
           `;
         }
@@ -163,9 +164,9 @@
           weeklyHtml += `
             <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center">
               <p class="text-sm font-semibold mb-1">${dayNames[dayIndex]}</p>
-              <img src="${getWeatherIcon(dayData.weather[0].icon)}" alt="${dayData.weather[0].description}" class="w-12 h-12"/>
-              <p class="text-xs font-bold">${dayData.temp.max.toFixed(0)}°C</p>
-              <p class="text-xs text-gray-600">${dayData.temp.min.toFixed(0)}°C</p>
+              <span class="text-xl">${getWeatherIcon(dayData.weather_code)}</span>
+              <p class="text-xs font-bold">${dayData.temperature_2m_max.toFixed(0)}°C</p>
+              <p class="text-xs text-gray-600">${dayData.temperature_2m_min.toFixed(0)}°C</p>
             </div>
           `;
         }
@@ -179,29 +180,40 @@
       }
     }
 
+    function getWeatherDescription(code) {
+        const descriptions = {
+            0: "Ciel clair", 1: "Principalement dégagé", 2: "Partiellement nuageux", 3: "Nuageux",
+            45: "Brouillard", 48: "Brouillard de givre", 51: "Bruine légère", 53: "Bruine modérée",
+            55: "Bruine dense", 56: "Bruine verglaçante légère", 57: "Bruine verglaçante dense",
+            61: "Pluie légère", 63: "Pluie modérée", 65: "Pluie forte", 66: "Pluie verglaçante légère",
+            67: "Pluie verglaçante forte", 71: "Chute de neige légère", 73: "Chute de neige modérée",
+            75: "Chute de neige forte", 77: "Grains de neige", 80: "Averses de pluie légères",
+            81: "Averses de pluie modérées", 82: "Averses de pluie fortes", 85: "Averses de neige légères",
+            86: "Averses de neige fortes", 95: "Orage", 96: "Orage avec grêle", 99: "Orage avec grêle forte"
+        };
+        return descriptions[code] || "Conditions inconnues";
+    }
+
     async function fetchSpotData(spot) {
-      // Ce code reste inchangé pour Stormglass
+      // Ce code utilise l'API Marine d'Open-Meteo
       try {
-          const currentKey = API_KEYS_STORMGlass[currentStormglassKeyIndex];
-          const url = `https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=swellHeight,swellPeriod,windWaveHeight,windWavePeriod,windDirection,windSpeed`;
-          const res = await fetch(url, {
-              headers: { 'Authorization': currentKey }
-          });
-
+          const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wind_speed_10m,wind_direction_10m&timezone=Africa%2FCasablanca`;
+          const res = await fetch(url);
           if (!res.ok) {
-              throw new Error(`Erreur de l'API Stormglass: ${res.status}`);
+              throw new Error(`Erreur de l'API Open-Meteo Marine: ${res.status}`);
           }
-
           const data = await res.json();
-          if (!data.hours || data.hours.length === 0) {
-              throw new Error("Données horaires Stormglass non disponibles");
+          if (!data.hourly || data.hourly.time.length === 0) {
+              throw new Error("Données de vagues non disponibles");
           }
           
-          const h = data.hours[0];
-          const waveHeight = (h.swellHeight?.value || 0) + (h.windWaveHeight?.value || 0);
-          const wavePeriod = (h.swellPeriod?.value || 0) + (h.windWavePeriod?.value || 0);
-          const windSpeed = h.windSpeed?.value || 0;
-          const windDir = h.windDirection?.value || 0;
+          const nowIndex = data.hourly.time.findIndex(time => new Date(time) >= new Date());
+          const h = data.hourly;
+          
+          const waveHeight = h.wave_height[nowIndex] || 0;
+          const wavePeriod = h.wave_period[nowIndex] || 0;
+          const windSpeed = h.wind_speed_10m[nowIndex] || 0;
+          const windDir = h.wind_direction_10m[nowIndex] || 0;
           
           return {
               name: spot.name,
@@ -213,7 +225,6 @@
                   wind_direction: windDir
               }
           };
-
       } catch (err) {
           return { name: spot.name, success: false, error: err.message };
       }
@@ -266,9 +277,6 @@
       
       const spotData = await Promise.all(spots.map(fetchSpotData));
       
-      currentStormglassKeyIndex = (currentStormglassKeyIndex + 1) % API_KEYS_STORMGlass.length;
-
-
       const resultsHTML = spotData.map(spot => {
           if (!spot.success) {
               return `<div class="bg-red-100 p-4 rounded-2xl shadow text-center flex items-center justify-center spot-card card"><div><h2 class="text-lg font-bold mb-2">${spot.name}</h2><p class="text-sm text-red-700">Erreur de chargement: ${spot.error}</p></div></div>`;
