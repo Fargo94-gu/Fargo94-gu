@@ -19,57 +19,88 @@
     }
     .arrow { display:inline-block; width:36px; height:36px; transform-origin: center center; transition: transform 0.4s ease; }
     .spot-card { min-height:220px; }
+
+    /* Style pour l'arrière-plan de la section météo avec opacité */
+    .weather-background {
+        background-image: url('https://i.imgur.com/your-image-url.png'); /* L'URL de l'image que vous avez fournie */
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        overflow: hidden; /* Assure que le contenu ne dépasse pas */
+    }
+
+    .weather-background::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: inherit; /* Utilise l'image du parent */
+        background-size: cover;
+        background-position: center;
+        opacity: 0.3; /* Opacité réduite de l'image d'arrière-plan */
+        z-index: -1; /* Place l'arrière-plan derrière le contenu */
+    }
+
+    /* Ajuster l'opacité des cartes météo pour qu'elles restent lisibles */
+    .weather-background .card {
+        background-color: rgba(255, 255, 255, 0.7); /* Opacité ajustée pour les cartes à l'intérieur */
+        backdrop-filter: blur(5px); /* Diminuer le flou si l'image est trop claire */
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-6">
   <h1 class="text-2xl font-bold mb-6 text-white text-shadow-lg">🌊 Surf Spots - Dakar (live)</h1>
 
   
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mb-6">
-    <div id="weather-today" class="card p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
-        <h2 class="text-xl font-bold mb-2">Aujourd'hui</h2>
-        <div class="flex items-center space-x-4">
-            <span class="text-4xl">🌤️</span>
-            <div>
-                <p class="text-3xl font-bold">28°C</p>
-                <p class="text-sm capitalize">Partiellement nuageux</p>
+  <div class="card p-6 rounded-2xl shadow-xl w-full max-w-6xl mb-6 weather-background">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="weather-today" class="bg-white bg-opacity-50 p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
+            <h2 class="text-xl font-bold mb-2">Aujourd'hui</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-4xl">🌤️</span>
+                <div>
+                    <p class="text-3xl font-bold">28°C</p>
+                    <p class="text-sm capitalize">Partiellement nuageux</p>
+                </div>
+            </div>
+            <div class="mt-4 text-xs">
+                <p>Min : 23°C | Max : 29°C</p>
+                <p>Vent : 25 km/h (NE)</p>
             </div>
         </div>
-        <div class="mt-4 text-xs">
-            <p>Min : 23°C | Max : 29°C</p>
-            <p>Vent : 25 km/h (NE)</p>
-        </div>
-    </div>
 
-    <div id="weather-tomorrow" class="card p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
-        <h2 class="text-xl font-bold mb-2">Demain</h2>
-        <div class="flex items-center space-x-4">
-            <span class="text-4xl">☀️</span>
-            <div>
-                <p class="text-3xl font-bold">29°C</p>
-                <p class="text-sm capitalize">Ciel dégagé</p>
+        <div id="weather-tomorrow" class="bg-white bg-opacity-50 p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
+            <h2 class="text-xl font-bold mb-2">Demain</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-4xl">☀️</span>
+                <div>
+                    <p class="text-3xl font-bold">29°C</p>
+                    <p class="text-sm capitalize">Ciel dégagé</p>
+                </div>
+            </div>
+            <div class="mt-4 text-xs">
+                <p>Min : 24°C | Max : 30°C</p>
+                <p>Vent : 22 km/h (N)</p>
             </div>
         </div>
-        <div class="mt-4 text-xs">
-            <p>Min : 24°C | Max : 30°C</p>
-            <p>Vent : 22 km/h (N)</p>
+        
+        <div id="weather-hourly" class="bg-white bg-opacity-50 p-6 rounded-2xl shadow-xl md:col-span-2 lg:col-span-1">
+            <h3 class="text-md font-bold mb-2">Prochaines heures</h3>
+            <div class="flex overflow-x-auto space-x-4 pb-2">
+                <div class="text-center flex-shrink-0"><p class="text-sm">13:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">14:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">15:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">16:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">17:00</p><span class="text-xl">🌤️</span><p class="text-xs">26°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">18:00</p><span class="text-xl">🌤️</span><p class="text-xs">25°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">19:00</p><span class="text-xl">☁️</span><p class="text-xs">25°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">20:00</p><span class="text-xl">☁️</span><p class="text-xs">24°C</p></div>
+                <div class="text-center flex-shrink-0"><p class="text-sm">21:00</p><span class="text-xl">🌙</span><p class="text-xs">24°C</p></div>
+            </div>
         </div>
-    </div>
-    
-    <div id="weather-hourly" class="card p-6 rounded-2xl shadow-xl md:col-span-2 lg:col-span-1">
-        <h3 class="text-md font-bold mb-2">Prochaines heures</h3>
-        <div class="flex overflow-x-auto space-x-4 pb-2">
-            <div class="text-center flex-shrink-0"><p class="text-sm">13:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">14:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">15:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">16:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">17:00</p><span class="text-xl">🌤️</span><p class="text-xs">26°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">18:00</p><span class="text-xl">🌤️</span><p class="text-xs">25°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">19:00</p><span class="text-xl">☁️</span><p class="text-xs">25°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">20:00</p><span class="text-xl">☁️</span><p class="text-xs">24°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">21:00</p><span class="text-xl">🌙</span><p class="text-xs">24°C</p></div>
-        </div>
-    </div>
+      </div>
   </div>
 
   <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full max-w-6xl mb-6">
@@ -184,11 +215,5 @@
   <button id="refreshBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" onclick="alert('Les données sont statiques et ne peuvent pas être actualisées.')">
     Actualiser les données
   </button>
-
-  <script>
-    // Il n'y a plus de fonctions d'API ici, car nous utilisons des données statiques.
-    // L'objectif est de vous permettre de finaliser l'aspect visuel de votre page.
-    // Une fois le design parfait, nous pourrons réintégrer les appels d'API.
-  </script>
 </body>
 </html>
