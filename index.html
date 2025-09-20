@@ -23,8 +23,8 @@
   </button>
 
   <script>
-    // Tableau avec les deux clés API de Stormglass.io
     const API_KEYS_STORMGlass = ["0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006", "8a48d324-95a8-11f0-b0b8-0242ac130006-8a48d3e2-95a8-11f0-b0b8-0242ac130006"];
+    const API_KEY_OPENWEATHER = "cff19fb0cabc814c8a5eadc002ab9cbf";
     const API_KEY_WorldTides = "0278aae2-48dd-421e-82d6-421baaa31786";
 
     let currentStormglassKeyIndex = 0;
@@ -49,55 +49,82 @@
       </svg>`;
     }
 
+    async function fetchDataForSpot(spot) {
+      // Tente de récupérer les données de Stormglass.io
+      try {
+        const currentKey = API_KEYS_STORMGlass[currentStormglassKeyIndex];
+        const url = `https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=swellHeight,swellPeriod,windWaveHeight,windWavePeriod,windDirection,windSpeed`;
+        const res = await fetch(url, {
+          headers: { 'Authorization': currentKey }
+        });
+        const data = await res.json();
+        
+        const h = data.hours && data.hours.length > 0 ? data.hours[0] : null;
+        
+        const waveHeight = (h.swellHeight?.value || 0) + (h.windWaveHeight?.value || 0);
+        const wavePeriod = (h.swellPeriod?.value || 0) + (h.windWavePeriod?.value || 0);
+        const windSpeed = h.windSpeed?.value || 0;
+        const windDir = h.windDirection?.value || 0;
+
+        if (waveHeight > 0 || windSpeed > 0) {
+          currentStormglassKeyIndex = (currentStormglassKeyIndex + 1) % API_KEYS_STORMGlass.length;
+          return {
+            name: spot.name,
+            success: true,
+            data: {
+              wave_height: waveHeight,
+              wave_period: wavePeriod,
+              wind_speed: windSpeed,
+              wind_direction: windDir,
+              source: "Stormglass"
+            }
+          };
+        }
+      } catch (err) {
+        // En cas d'échec, nous n'affichons rien et nous essayons OpenWeather.
+      }
+      
+      // Si Stormglass ne donne pas de données, tente de récupérer les données de OpenWeather
+      try {
+        const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${spot.lat}&lon=${spot.lon}&appid=${API_KEY_OPENWEATHER}&units=metric&exclude=minutely,hourly,daily,alerts`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        const h = data.current;
+        const waveHeight = h.wave_height || 0;
+        const wavePeriod = h.wave_period || 0;
+        const windSpeed = h.wind_speed || 0;
+        const windDir = h.wind_deg || 0;
+        
+        if (waveHeight > 0 || windSpeed > 0) {
+          return {
+            name: spot.name,
+            success: true,
+            data: {
+              wave_height: waveHeight,
+              wave_period: wavePeriod,
+              wind_speed: windSpeed,
+              wind_direction: windDir,
+              source: "OpenWeather"
+            }
+          };
+        }
+      } catch (err) {
+        return { name: spot.name, success: false, error: err.message };
+      }
+
+      return { name: spot.name, success: false, error: "Toutes les APIs ont échoué ou n'ont pas de données" };
+    }
+
     async function fetchAllData() {
       const container = document.getElementById("spots");
       container.innerHTML = "<p class='col-span-3 text-center'>Chargement des données...</p>";
       const tideDiv = document.getElementById("tides");
       tideDiv.innerHTML = "<p class='text-center'>Chargement des marées...</p>";
 
-      // Fetch spot data from Stormglass.io
-      const spotData = await Promise.all(spots.map(async (spot) => {
-          try {
-              const currentKey = API_KEYS_STORMGlass[currentStormglassKeyIndex];
-              const url = `https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=swellHeight,swellPeriod,windWaveHeight,windWavePeriod,windDirection,windSpeed`;
-              const res = await fetch(url, {
-                  headers: { 'Authorization': currentKey }
-              });
-
-              if (!res.ok) {
-                  throw new Error(`Erreur de l'API: ${res.status}`);
-              }
-
-              const data = await res.json();
-              if (!data.hours || data.hours.length === 0) {
-                  throw new Error("Données horaires non disponibles");
-              }
-              
-              const h = data.hours[0];
-              const waveHeight = (h.swellHeight?.value || 0) + (h.windWaveHeight?.value || 0);
-              const wavePeriod = (h.swellPeriod?.value || 0) + (h.windWavePeriod?.value || 0);
-              const windSpeed = h.windSpeed?.value || 0;
-              const windDir = h.windDirection?.value || 0;
-              
-              return {
-                  name: spot.name,
-                  success: true,
-                  data: {
-                      wave_height: waveHeight,
-                      wave_period: wavePeriod,
-                      wind_speed: windSpeed,
-                      wind_direction: windDir
-                  }
-              };
-
-          } catch (err) {
-              return { name: spot.name, success: false, error: err.message };
-          }
-      }));
+      // Fetch spot data
+      const spotData = await Promise.all(spots.map(fetchDataForSpot));
       
-      currentStormglassKeyIndex = (currentStormglassKeyIndex + 1) % API_KEYS_STORMGlass.length;
-
-
       const resultsHTML = spotData.map(spot => {
           if (!spot.success) {
               return `<div class="bg-red-100 p-4 rounded-2xl shadow text-center flex items-center justify-center spot-card"><div><h2 class="text-lg font-bold mb-2">${spot.name}</h2><p class="text-sm text-red-700">Erreur de chargement: ${spot.error}</p></div></div>`;
