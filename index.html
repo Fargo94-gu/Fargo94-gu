@@ -27,317 +27,168 @@
   
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mb-6">
     <div id="weather-today" class="card p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
-      <p>Chargement de la météo...</p>
+        <h2 class="text-xl font-bold mb-2">Aujourd'hui</h2>
+        <div class="flex items-center space-x-4">
+            <span class="text-4xl">🌤️</span>
+            <div>
+                <p class="text-3xl font-bold">28°C</p>
+                <p class="text-sm capitalize">Partiellement nuageux</p>
+            </div>
+        </div>
+        <div class="mt-4 text-xs">
+            <p>Min : 23°C | Max : 29°C</p>
+            <p>Vent : 25 km/h (NE)</p>
+        </div>
     </div>
 
     <div id="weather-tomorrow" class="card p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
-      <p>Chargement de la météo...</p>
+        <h2 class="text-xl font-bold mb-2">Demain</h2>
+        <div class="flex items-center space-x-4">
+            <span class="text-4xl">☀️</span>
+            <div>
+                <p class="text-3xl font-bold">29°C</p>
+                <p class="text-sm capitalize">Ciel dégagé</p>
+            </div>
+        </div>
+        <div class="mt-4 text-xs">
+            <p>Min : 24°C | Max : 30°C</p>
+            <p>Vent : 22 km/h (N)</p>
+        </div>
     </div>
     
     <div id="weather-hourly" class="card p-6 rounded-2xl shadow-xl md:col-span-2 lg:col-span-1">
-      <p>Chargement des prévisions...</p>
+        <h3 class="text-md font-bold mb-2">Prochaines heures</h3>
+        <div class="flex overflow-x-auto space-x-4 pb-2">
+            <div class="text-center flex-shrink-0"><p class="text-sm">13:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">14:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">15:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">16:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">17:00</p><span class="text-xl">🌤️</span><p class="text-xs">26°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">18:00</p><span class="text-xl">🌤️</span><p class="text-xs">25°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">19:00</p><span class="text-xl">☁️</span><p class="text-xs">25°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">20:00</p><span class="text-xl">☁️</span><p class="text-xs">24°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-sm">21:00</p><span class="text-xl">🌙</span><p class="text-xs">24°C</p></div>
+        </div>
     </div>
   </div>
 
   <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full max-w-6xl mb-6">
-    <p class='col-span-7 text-center card p-4 rounded-2xl'>Chargement des prévisions de la semaine...</p>
+    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Dim</p><span class="text-xl">☀️</span><p class="text-xs font-bold">30°C</p><p class="text-xs text-gray-600">25°C</p></div>
+    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Lun</p><span class="text-xl">☁️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
+    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Mar</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">28°C</p><p class="text-xs text-gray-600">23°C</p></div>
+    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Mer</p><span class="text-xl">☀️</span><p class="text-xs font-bold">31°C</p><p class="text-xs text-gray-600">26°C</p></div>
+    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Jeu</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
+    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Ven</p><span class="text-xl">☁️</span><p class="text-xs font-bold">27°C</p><p class="text-xs text-gray-600">22°C</p></div>
+    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Sam</p><span class="text-xl">🌦️</span><p class="text-xs font-bold">26°C</p><p class="text-xs text-gray-600">21°C</p></div>
   </div>
   
-  <div id="spots" class="grid md:grid-cols-3 gap-6 w-full max-w-6xl"></div>
+  <div id="spots" class="grid md:grid-cols-3 gap-6 w-full max-w-6xl">
+    <div class="p-4 rounded-2xl shadow text-center spot-card card">
+        <h2 class="text-lg font-bold mb-2">Yoff</h2>
+        <div class="flex flex-col items-center mt-2">
+            <span class="text-4xl">🌊</span>
+            <div class="text-sm mt-1">taille = 1.2 m</div>
+            <div class="text-sm">période = 7.1 s</div>
+        </div>
+        <div class="mt-3 text-sm text-gray-700">
+            Vent : 20 km/h (NNE)
+        </div>
+        <div class="mt-2 flex justify-center" style="transform: rotate(22.5deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+        <div class="mt-3 text-xs text-gray-500">
+            Meilleure hauteur (48h) : 1.4 m
+        </div>
+    </div>
+    <div class="p-4 rounded-2xl shadow text-center spot-card card">
+        <h2 class="text-lg font-bold mb-2">Les Almadies</h2>
+        <div class="flex flex-col items-center mt-2">
+            <span class="text-4xl">🌊</span>
+            <div class="text-sm mt-1">taille = 1.4 m</div>
+            <div class="text-sm">période = 8.5 s</div>
+        </div>
+        <div class="mt-3 text-sm text-gray-700">
+            Vent : 25 km/h (N)
+        </div>
+        <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+        <div class="mt-3 text-xs text-gray-500">
+            Meilleure hauteur (48h) : 1.6 m
+        </div>
+    </div>
+    <div class="p-4 rounded-2xl shadow text-center spot-card card">
+        <h2 class="text-lg font-bold mb-2">Le Virage</h2>
+        <div class="flex flex-col items-center mt-2">
+            <span class="text-4xl">🌊</span>
+            <div class="text-sm mt-1">taille = 1.1 m</div>
+            <div class="text-sm">période = 6.9 s</div>
+        </div>
+        <div class="mt-3 text-sm text-gray-700">
+            Vent : 18 km/h (NE)
+        </div>
+        <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+        <div class="mt-3 text-xs text-gray-500">
+            Meilleure hauteur (48h) : 1.3 m
+        </div>
+    </div>
+    <div class="p-4 rounded-2xl shadow text-center spot-card card">
+        <h2 class="text-lg font-bold mb-2">Ngor</h2>
+        <div class="flex flex-col items-center mt-2">
+            <span class="text-4xl">🌊</span>
+            <div class="text-sm mt-1">taille = 1.0 m</div>
+            <div class="text-sm">période = 7.5 s</div>
+        </div>
+        <div class="mt-3 text-sm text-gray-700">
+            Vent : 22 km/h (N)
+        </div>
+        <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+        <div class="mt-3 text-xs text-gray-500">
+            Meilleure hauteur (48h) : 1.1 m
+        </div>
+    </div>
+    <div class="p-4 rounded-2xl shadow text-center spot-card card">
+        <h2 class="text-lg font-bold mb-2">Ouakam</h2>
+        <div class="flex flex-col items-center mt-2">
+            <span class="text-4xl">🌊</span>
+            <div class="text-sm mt-1">taille = 1.3 m</div>
+            <div class="text-sm">période = 7.8 s</div>
+        </div>
+        <div class="mt-3 text-sm text-gray-700">
+            Vent : 21 km/h (NE)
+        </div>
+        <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+        <div class="mt-3 text-xs text-gray-500">
+            Meilleure hauteur (48h) : 1.5 m
+        </div>
+    </div>
+    <div class="p-4 rounded-2xl shadow text-center spot-card card">
+        <h2 class="text-lg font-bold mb-2">Secret Spot</h2>
+        <div class="flex flex-col items-center mt-2">
+            <span class="text-4xl">🌊</span>
+            <div class="text-sm mt-1">taille = 1.0 m</div>
+            <div class="text-sm">période = 6.5 s</div>
+        </div>
+        <div class="mt-3 text-sm text-gray-700">
+            Vent : 19 km/h (E)
+        </div>
+        <div class="mt-2 flex justify-center" style="transform: rotate(90deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+        <div class="mt-3 text-xs text-gray-500">
+            Meilleure hauteur (48h) : 1.2 m
+        </div>
+    </div>
+  </div>
 
-  <div id="tides" class="mt-10 card p-4 rounded-2xl shadow w-full max-w-3xl text-center"></div>
+  <div id="tides" class="mt-10 card p-4 rounded-2xl shadow w-full max-w-3xl text-center">
+    <h2 class="text-lg font-bold mb-3">🌊 Marées à Dakar</h2>
+    <p class="text-sm">Prochaine marée haute : 14:30 (2.5 m)</p>
+    <p class="text-sm">Prochaine marée basse : 21:00 (0.8 m)</p>
+  </div>
 
-  <button id="refreshBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+  <button id="refreshBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" onclick="alert('Les données sont statiques et ne peuvent pas être actualisées.')">
     Actualiser les données
   </button>
 
   <script>
-    const API_KEY_WorldTides = "0278aae2-48dd-421e-82d6-421baaa31786";
-
-    const spots = [
-      { id: 'yoff', name: "Yoff", lat: 14.765, lon: -17.485 },
-      { id: 'almadies', name: "Les Almadies", lat: 14.741, lon: -17.531 },
-      { id: 'virage', name: "Le Virage", lat: 14.755, lon: -17.511 },
-      { id: 'ngor', name: "Ngor", lat: 14.7514, lon: -17.5164 },
-      { id: 'ouakam', name: "Ouakam", lat: 14.7163, lon: -17.4897 },
-      { id: 'secret_spot', name: "Secret Spot", lat: 14.736, lon: -17.513 }
-    ];
-
-    function degToCompass(deg) {
-      const dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-      return dirs[Math.round(deg / 22.5) % 16];
-    }
-
-    function arrowSVG() {
-      return `<svg class="arrow" viewBox="0 0 24 24">
-        <path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"/>
-      </svg>`;
-    }
-    
-    function getWeatherIcon(code) {
-        const iconMap = {
-            0: '☀️', 1: '🌤️', 2: '☁️', 3: '🌥️',
-            45: '🌫️', 48: '🌫️', 51: '🌧️', 53: '🌧️',
-            55: '🌧️', 56: '🌧️', 57: '🌧️',
-            61: '🌦️', 63: '🌧️', 65: '🌧️', 66: '🌧️',
-            67: '🌧️', 71: '🌨️', 73: '🌨️',
-            75: '🌨️', 77: '🌨️', 80: '🌧️',
-            81: '🌧️', 82: '🌧️', 85: '🌨️',
-            86: '🌨️', 95: '⛈️', 96: '⛈️', 99: '⛈️'
-        };
-        return iconMap[code] || '❓';
-    }
-
-    function getWeatherDescription(code) {
-        const descriptions = {
-            0: "Ciel clair", 1: "Principalement dégagé", 2: "Partiellement nuageux", 3: "Nuageux",
-            45: "Brouillard", 48: "Brouillard de givre", 51: "Bruine légère", 53: "Bruine modérée",
-            55: "Bruine dense", 56: "Bruine verglaçante légère", 57: "Bruine verglaçante dense",
-            61: "Pluie légère", 63: "Pluie modérée", 65: "Pluie forte", 66: "Pluie verglaçante légère",
-            67: "Pluie verglaçante forte", 71: "Chute de neige légère", 73: "Chute de neige modérée",
-            75: "Chute de neige forte", 77: "Grains de neige", 80: "Averses de pluie légères",
-            81: "Averses de pluie modérées", 82: "Averses de pluie fortes", 85: "Averses de neige légères",
-            86: "Averses de neige fortes", 95: "Orage", 96: "Orage avec grêle", 99: "Orage avec grêle forte"
-        };
-        return descriptions[code] || "Conditions inconnues";
-    }
-
-    async function fetchWeatherData() {
-      const todayDiv = document.getElementById("weather-today");
-      const tomorrowDiv = document.getElementById("weather-tomorrow");
-      const hourlyDiv = document.getElementById("weather-hourly");
-      const weeklyDiv = document.getElementById("weather-weekly");
-      
-      const dakarLat = 14.7645;
-      const dakarLon = -17.3660;
-
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${dakarLat}&longitude=${dakarLon}&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Africa%2FCasablanca`;
-        const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error(`Erreur de l'API Open-Meteo: ${res.status}`);
-        }
-        const data = await res.json();
-        
-        // --- Correction de la logique pour les données quotidiennes et horaires ---
-        if (!data.daily || !data.hourly || data.daily.time.length < 2 || data.hourly.time.length < 24) {
-            throw new Error("Données météo incomplètes");
-        }
-        
-        const currentHourIndex = data.hourly.time.findIndex(time => new Date(time) >= new Date());
-        
-        // Aujourd'hui
-        const todayForecast = {
-            weather_code: data.daily.weather_code[0],
-            temperature_2m_min: data.daily.temperature_2m_min[0],
-            temperature_2m_max: data.daily.temperature_2m_max[0]
-        };
-        const currentHourData = data.hourly.temperature_2m[currentHourIndex];
-        
-        todayDiv.innerHTML = `
-          <h2 class="text-xl font-bold mb-2">Aujourd'hui</h2>
-          <div class="flex items-center space-x-4">
-            <span class="text-4xl">${getWeatherIcon(data.hourly.weather_code[currentHourIndex])}</span>
-            <div>
-              <p class="text-3xl font-bold">${currentHourData.toFixed(0)}°C</p>
-              <p class="text-sm capitalize">${getWeatherDescription(data.hourly.weather_code[currentHourIndex])}</p>
-            </div>
-          </div>
-          <div class="mt-4 text-xs">
-              <p>Min : ${todayForecast.temperature_2m_min.toFixed(0)}°C | Max : ${todayForecast.temperature_2m_max.toFixed(0)}°C</p>
-              <p>Vent : ${(data.hourly.wind_speed_10m[currentHourIndex] * 3.6).toFixed(0)} km/h (${degToCompass(data.hourly.wind_direction_10m[currentHourIndex])})</p>
-          </div>
-        `;
-        
-        // Demain
-        const tomorrowForecast = {
-            weather_code: data.daily.weather_code[1],
-            temperature_2m_min: data.daily.temperature_2m_min[1],
-            temperature_2m_max: data.daily.temperature_2m_max[1]
-        };
-        tomorrowDiv.innerHTML = `
-          <h2 class="text-xl font-bold mb-2">Demain</h2>
-          <div class="flex items-center space-x-4">
-            <span class="text-4xl">${getWeatherIcon(tomorrowForecast.weather_code)}</span>
-            <div>
-              <p class="text-3xl font-bold">${tomorrowForecast.temperature_2m_max.toFixed(0)}°C</p>
-              <p class="text-sm capitalize">${getWeatherDescription(tomorrowForecast.weather_code)}</p>
-            </div>
-          </div>
-          <div class="mt-4 text-xs">
-              <p>Min : ${tomorrowForecast.temperature_2m_min.toFixed(0)}°C | Max : ${tomorrowForecast.temperature_2m_max.toFixed(0)}°C</p>
-              <p>Vent : N/A</p>
-          </div>
-        `;
-
-        // Prévisions horaires (prochaines 24h)
-        let hourlyHtml = '<h3 class="text-md font-bold mb-2">Prochaines heures</h3><div class="flex overflow-x-auto space-x-4 pb-2">';
-        for (let i = 0; i < 24; i++) {
-          const hourData = data.hourly;
-          const time = new Date(hourData.time[currentHourIndex + i]).getHours();
-          hourlyHtml += `
-            <div class="text-center flex-shrink-0">
-              <p class="text-sm">${time}:00</p>
-              <span class="text-xl">${getWeatherIcon(hourData.weather_code[currentHourIndex + i])}</span>
-              <p class="text-xs">${hourData.temperature_2m[currentHourIndex + i].toFixed(0)}°C</p>
-            </div>
-          `;
-        }
-        hourlyHtml += '</div>';
-        hourlyDiv.innerHTML = hourlyHtml;
-
-        // Prévisions de la semaine
-        let weeklyHtml = '';
-        const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-        for (let i = 1; i < 8; i++) {
-          const dayData = {
-              weather_code: data.daily.weather_code[i],
-              temperature_2m_min: data.daily.temperature_2m_min[i],
-              temperature_2m_max: data.daily.temperature_2m_max[i]
-          };
-          const dayIndex = (new Date().getDay() + i) % 7;
-          weeklyHtml += `
-            <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center">
-              <p class="text-sm font-semibold mb-1">${dayNames[dayIndex]}</p>
-              <span class="text-xl">${getWeatherIcon(dayData.weather_code)}</span>
-              <p class="text-xs font-bold">${dayData.temperature_2m_max.toFixed(0)}°C</p>
-              <p class="text-xs text-gray-600">${dayData.temperature_2m_min.toFixed(0)}°C</p>
-            </div>
-          `;
-        }
-        weeklyDiv.innerHTML = weeklyHtml;
-
-      } catch (e) {
-        todayDiv.innerHTML = `<p class="text-red-600">Erreur météo: ${e.message}</p>`;
-        tomorrowDiv.innerHTML = `<p class="text-red-600">Erreur météo: ${e.message}</p>`;
-        hourlyDiv.innerHTML = `<p class="text-red-600">Erreur météo: ${e.message}</p>`;
-        weeklyDiv.innerHTML = `<p class="text-red-600">Erreur météo: ${e.message}</p>`;
-      }
-    }
-
-    async function fetchSpotData(spot) {
-      // Ce code utilise l'API Marine d'Open-Meteo
-      try {
-          const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wind_speed_10m,wind_direction_10m&timezone=Africa%2FCasablanca`;
-          const res = await fetch(url);
-          if (!res.ok) {
-              throw new Error(`Erreur de l'API Open-Meteo Marine: ${res.status}`);
-          }
-          const data = await res.json();
-          if (!data.hourly || data.hourly.time.length === 0) {
-              throw new Error("Données de vagues non disponibles");
-          }
-          
-          const nowIndex = data.hourly.time.findIndex(time => new Date(time) >= new Date());
-          const h = data.hourly;
-          
-          const waveHeight = h.wave_height[nowIndex] || 0;
-          const wavePeriod = h.wave_period[nowIndex] || 0;
-          const windSpeed = h.wind_speed_10m[nowIndex] || 0;
-          const windDir = h.wind_direction_10m[nowIndex] || 0;
-          
-          return {
-              name: spot.name,
-              success: true,
-              data: {
-                  wave_height: waveHeight,
-                  wave_period: wavePeriod,
-                  wind_speed: windSpeed,
-                  wind_direction: windDir
-              }
-          };
-      } catch (err) {
-          return { name: spot.name, success: false, error: err.message };
-      }
-    }
-
-    async function fetchTideData() {
-        const tideDiv = document.getElementById("tides");
-        tideDiv.innerHTML = "<p class='text-center'>Chargement des marées...</p>";
-        try {
-            const today = new Date().toISOString().split('T')[0];
-            const tideUrl = `https://www.worldtides.info/api?extremes&lat=14.66&lon=-17.43&key=${API_KEY_WorldTides}&date=${today}`;
-            const res = await fetch(tideUrl);
-            if (!res.ok) {
-                throw new Error(`Erreur de l'API: ${res.status}`);
-            }
-            const data = await res.json();
-            if (!data.extremes || data.extremes.length === 0) {
-                throw new Error("Données de marée non disponibles");
-            }
-            const extremes = data.extremes;
-            const now = new Date();
-            let nextHigh = null, nextLow = null;
-            for (const extreme of extremes) {
-                const extremeTime = new Date(extreme.dt * 1000);
-                if (extremeTime > now) {
-                    if (extreme.type === 'High' && !nextHigh) {
-                        nextHigh = { time: extremeTime, val: extreme.height };
-                    } else if (extreme.type === 'Low' && !nextLow) {
-                        nextLow = { time: extremeTime, val: extreme.height };
-                    }
-                }
-                if (nextHigh && nextLow) break;
-            }
-            tideDiv.innerHTML = `
-                <h2 class="text-lg font-bold mb-3">🌊 Marées à Dakar</h2>
-                <p class="text-sm">Prochaine marée haute : ${nextHigh ? new Date(nextHigh.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + " (" + nextHigh.val.toFixed(1) + " m)" : "N/A"}</p>
-                <p class="text-sm">Prochaine marée basse : ${nextLow ? new Date(nextLow.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + " (" + nextLow.val.toFixed(1) + " m)" : "N/A"}</p>
-            `;
-        } catch (e) {
-            tideDiv.innerHTML = `<p class="text-red-600">Erreur chargement marées: ${e.message}</p>`;
-        }
-    }
-
-    async function initializePage() {
-      const container = document.getElementById("spots");
-      container.innerHTML = "<p class='col-span-3 text-center'>Chargement des données...</p>";
-
-      fetchWeatherData();
-      fetchTideData();
-      
-      const spotData = await Promise.all(spots.map(fetchSpotData));
-      
-      const resultsHTML = spotData.map(spot => {
-          if (!spot.success) {
-              return `<div class="bg-red-100 p-4 rounded-2xl shadow text-center flex items-center justify-center spot-card card"><div><h2 class="text-lg font-bold mb-2">${spot.name}</h2><p class="text-sm text-red-700">Erreur de chargement: ${spot.error}</p></div></div>`;
-          }
-
-          const current = spot.data;
-
-          return `<div class="p-4 rounded-2xl shadow text-center spot-card card">
-              <h2 class="text-lg font-bold mb-2">${spot.name}</h2>
-              <div class="flex flex-col items-center mt-2">
-                <span class="text-4xl">🌊</span>
-                <div class="text-sm mt-1">taille = ${current.wave_height.toFixed(1)} m</div>
-                <div class="text-sm">période = ${current.wave_period.toFixed(1)} s</div>
-              </div>
-              <div class="mt-3 text-sm text-gray-700">
-                Vent : ${(current.wind_speed * 3.6).toFixed(1)} km/h (${degToCompass(current.wind_direction)})
-              </div>
-              <div class="mt-2 flex justify-center">${arrowSVG()}</div>
-              <div class="mt-3 text-xs text-gray-500">
-                Meilleure hauteur (48h) : N/A
-              </div>
-            </div>`;
-      }).join("");
-
-      container.innerHTML = resultsHTML;
-
-      spotData.forEach((spot, i) => {
-          if (spot.success) {
-              const card = container.children[i];
-              const arrow = card.querySelector(".arrow");
-              if (arrow) {
-                  const deg = spot.data.wind_direction;
-                  arrow.style.transform = `rotate(${deg}deg)`;
-              }
-          }
-      });
-    }
-
-    document.getElementById("refreshBtn").addEventListener("click", initializePage);
-    initializePage();
+    // Il n'y a plus de fonctions d'API ici, car nous utilisons des données statiques.
+    // L'objectif est de vous permettre de finaliser l'aspect visuel de votre page.
+    // Une fois le design parfait, nous pourrons réintégrer les appels d'API.
   </script>
 </body>
 </html>
