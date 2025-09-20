@@ -49,7 +49,7 @@
 
     /* Style pour la phrase d'approche */
     .surf-tagline {
-        background-color: rgba(7, 89, 133, 0.9);
+        background-color: rgba(7, 89, 133, 0.7);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         color: white;
@@ -64,20 +64,54 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
+    /* Style pour les titres des sections - Position rapprochée */
+    .section-title {
+        background-color: rgba(7, 89, 133, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 1rem;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem; /* Très rapproché du conteneur */
+        max-width: 90%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
     /* Styles pour le conteneur Météo */
     .all-weather-container {
         position: relative;
         border-radius: 1rem;
         overflow: hidden;
-        padding: 1.5rem;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1.5rem;
+        gap: 1rem;
         width: 100%;
         background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
         background-size: cover;
-        margin-top: 3rem; /* Espace pour le logo */
+        margin-top: 2rem; /* Espace réduit pour le logo */
+    }
+
+    /* Styles pour le conteneur Marées */
+    .all-tides-container {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        margin: 0.5rem 0; /* Espace très réduit entre sections */
+        background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
+        background-size: cover;
+        max-width: 3xl;
     }
 
     /* Styles pour le conteneur Spots de Surf */
@@ -91,13 +125,13 @@
         align-items: center;
         gap: 1.5rem;
         width: 100%;
-        margin-top: 1.5rem;
+        margin-top: 0.5rem; /* Très rapproché des marées */
         background: url('https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
         background-size: cover;
     }
 
-    /* Overlay pour les deux conteneurs */
-    .all-weather-container::before, .all-spots-container::before {
+    /* Overlay pour les trois conteneurs */
+    .all-weather-container::before, .all-tides-container::before, .all-spots-container::before {
         content: '';
         position: absolute;
         top: 0;
@@ -111,7 +145,7 @@
     }
 
     /* Assurez-vous que le contenu est au-dessus de l'overlay */
-    .all-weather-container > *, .all-spots-container > * {
+    .all-weather-container > *, .all-tides-container > *, .all-spots-container > * {
         position: relative;
         z-index: 1;
     }
@@ -123,7 +157,7 @@
         -webkit-backdrop-filter: blur(5px);
         border-radius: 1rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        padding: 1.5rem;
+        padding: 1rem;
     }
 
     .weather-weekly-card {
@@ -132,7 +166,62 @@
         -webkit-backdrop-filter: blur(5px);
         border-radius: 0.75rem;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        padding: 0.5rem;
+    }
+
+    /* Style pour les cartes de marées - Réduit */
+    .tide-card {
+        background-color: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Style pour les informations de marée - Compact */
+    .tide-info {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .tide-item {
+        text-align: center;
         padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 0.5rem;
+        min-width: 100px;
+    }
+
+    .tide-type {
+        font-weight: bold;
+        font-size: 0.75rem;
+        color: #075985;
+        margin-bottom: 0.125rem;
+    }
+
+    .tide-time {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: #1e40af;
+        margin-bottom: 0.125rem;
+    }
+
+    .tide-height {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .tide-direction {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.125rem;
     }
   </style>
 </head>
@@ -147,67 +236,103 @@
     "Votre check quotidien : météo précise et vagues live pour choper les meilleurs spots de Dakar !"
   </div>
 
-  <h1 class="text-2xl font-bold mb-6 text-white text-shadow-lg">Surf Spots - Dakar (live)</h1>
+  <h1 class="text-2xl font-bold mb-4 text-white text-shadow-lg">Surf Spots - Dakar (live)</h1>
 
-  <div class="all-weather-container mb-6 shadow-xl">
-    <h2 class="text-xl font-bold mb-4 text-center">Météo</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+  <!-- Titre Météo - Juste au-dessus du conteneur -->
+  <div class="section-title">🌤️ Météo</div>
+  
+  <div class="all-weather-container mb-2 shadow-xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
       <div id="weather-today" class="weather-card flex flex-col items-center justify-center">
-        <h3 class="text-xl font-bold mb-2">Aujourd'hui</h3>
-        <div class="flex items-center space-x-4">
-            <span class="text-4xl">🌤️</span>
+        <h3 class="text-lg font-bold mb-2">Aujourd'hui</h3>
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl">🌤️</span>
             <div>
-                <p class="text-3xl font-bold">28°C</p>
+                <p class="text-2xl font-bold">28°C</p>
                 <p class="text-sm capitalize">Partiellement nuageux</p>
             </div>
         </div>
-        <div class="mt-4 text-xs">
+        <div class="mt-3 text-xs">
             <p>Min : 23°C | Max : 29°C</p>
             <p>Vent : 25 km/h (NE)</p>
         </div>
       </div>
       <div id="weather-tomorrow" class="weather-card flex flex-col items-center justify-center">
-        <h3 class="text-xl font-bold mb-2">Demain</h3>
-        <div class="flex items-center space-x-4">
-            <span class="text-4xl">☀️</span>
+        <h3 class="text-lg font-bold mb-2">Demain</h3>
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl">☀️</span>
             <div>
-                <p class="text-3xl font-bold">29°C</p>
+                <p class="text-2xl font-bold">29°C</p>
                 <p class="text-sm capitalize">Ciel dégagé</p>
             </div>
         </div>
-        <div class="mt-4 text-xs">
+        <div class="mt-3 text-xs">
             <p>Min : 24°C | Max : 30°C</p>
             <p>Vent : 22 km/h (N)</p>
         </div>
       </div>
       <div id="weather-hourly" class="weather-card md:col-span-2 lg:col-span-1">
-        <h3 class="text-md font-bold mb-2">Prochaines heures</h3>
-        <div class="flex overflow-x-auto space-x-4 pb-2">
-            <div class="text-center flex-shrink-0"><p class="text-sm">13:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">14:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">15:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">16:00</p><span class="text-xl">🌤️</span><p class="text-xs">27°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">17:00</p><span class="text-xl">🌤️</span><p class="text-xs">26°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">18:00</p><span class="text-xl">🌤️</span><p class="text-xs">25°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">19:00</p><span class="text-xl">☁️</span><p class="text-xs">25°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">20:00</p><span class="text-xl">☁️</span><p class="text-xs">24°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-sm">21:00</p><span class="text-xl">🌙</span><p class="text-xs">24°C</p></div>
+        <h3 class="text-sm font-bold mb-2">Prochaines heures</h3>
+        <div class="flex overflow-x-auto space-x-3 pb-2">
+            <div class="text-center flex-shrink-0"><p class="text-xs">13:00</p><span class="text-lg">🌤️</span><p class="text-xs">28°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">14:00</p><span class="text-lg">🌤️</span><p class="text-xs">28°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">15:00</p><span class="text-lg">🌤️</span><p class="text-xs">27°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">16:00</p><span class="text-lg">🌤️</span><p class="text-xs">27°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">17:00</p><span class="text-lg">🌤️</span><p class="text-xs">26°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">18:00</p><span class="text-lg">🌤️</span><p class="text-xs">25°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">19:00</p><span class="text-lg">☁️</span><p class="text-xs">25°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">20:00</p><span class="text-lg">☁️</span><p class="text-xs">24°C</p></div>
+            <div class="text-center flex-shrink-0"><p class="text-xs">21:00</p><span class="text-lg">🌙</span><p class="text-xs">24°C</p></div>
         </div>
       </div>
     </div>
-    <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full mt-6">
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Dim</p><span class="text-xl">☀️</span><p class="text-xs font-bold">30°C</p><p class="text-xs text-gray-600">25°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Lun</p><span class="text-xl">☁️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Mar</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">28°C</p><p class="text-xs text-gray-600">23°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Mer</p><span class="text-xl">☀️</span><p class="text-xs font-bold">31°C</p><p class="text-xs text-gray-600">26°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Jeu</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Ven</p><span class="text-xl">☁️</span><p class="text-xs font-bold">27°C</p><p class="text-xs text-gray-600">22°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Sam</p><span class="text-xl">🌦️</span><p class="text-xs font-bold">26°C</p><p class="text-xs text-gray-600">21°C</p></div>
+    <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 w-full mt-4">
+      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Dim</p><span class="text-lg">☀️</span><p class="text-xs font-bold">30°C</p><p class="text-xs text-gray-600">25°C</p></div>
+      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Lun</p><span class="text-lg">☁️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
+      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Mar</p><span class="text-lg">🌤️</span><p class="text-xs font-bold">28°C</p><p class="text-xs text-gray-600">23°C</p></div>
+      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Mer</p><span class="text-lg">☀️</span><p class="text-xs font-bold">31°C</p><p class="text-xs text-gray-600">26°C</p></div>
+      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Jeu</p><span class="text-lg">🌤️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
+      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Ven</p><span class="text-lg">☁️</span><p class="text-xs font-bold">27°C</p><p class="text-xs text-gray-600">22°C</p></div>
+      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Sam</p><span class="text-lg">🌦️</span><p class="text-xs font-bold">26°C</p><p class="text-xs text-gray-600">21°C</p></div>
     </div>
   </div>
 
+  <!-- Titre Marées - Juste au-dessus du conteneur -->
+  <div class="section-title">🌊 Marées à Dakar</div>
+  
+  <div class="all-tides-container shadow-xl">
+    <div class="tide-card">
+      <div class="flex flex-col items-center justify-center">
+        <div class="text-3xl mb-2">🌊</div>
+        
+        <!-- Informations de marée organisées -->
+        <div class="tide-info">
+          <div class="tide-item">
+            <div class="tide-type">Haute</div>
+            <div class="tide-time">14:30</div>
+            <div class="tide-height">2.5 m</div>
+            <div class="tide-direction">↑</div>
+          </div>
+          
+          <div class="tide-item">
+            <div class="tide-type">Basse</div>
+            <div class="tide-time">21:00</div>
+            <div class="tide-height">0.8 m</div>
+            <div class="tide-direction">↓</div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-xs text-gray-700">
+          <p><strong>Prochaine :</strong> Haute dans 1h 15min</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Titre Spots de Surf - Juste au-dessus du conteneur -->
+  <div class="section-title">🌊 Spots de Surf</div>
+  
   <div class="all-spots-container shadow-xl">
-    <h2 class="text-xl font-bold mb-4 text-center">Spots de Surf</h2>
     <div id="spots" class="grid md:grid-cols-3 gap-6 w-full">
       <div class="p-4 rounded-2xl shadow text-center spot-card card">
           <h2 class="text-lg font-bold mb-2">Yoff</h2>
@@ -300,12 +425,6 @@
           </div>
       </div>
     </div>
-  </div>
-
-  <div id="tides" class="mt-10 card p-4 rounded-2xl shadow w-full max-w-3xl text-center">
-    <h2 class="text-lg font-bold mb-3">🌊 Marées à Dakar</h2>
-    <p class="text-sm">Prochaine marée haute : 14:30 (2.5 m)</p>
-    <p class="text-sm">Prochaine marée basse : 21:00 (0.8 m)</p>
   </div>
 
   <button id="refreshBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" onclick="alert('Les données sont statiques et ne peuvent pas être actualisées.')">
