@@ -20,11 +20,16 @@
     .arrow { display:inline-block; width:36px; height:36px; transform-origin: center center; transition: transform 0.4s ease; }
     .spot-card { min-height:220px; }
 
-    .weather-container {
+    /* Conteneur principal pour toutes les sections météo avec le fond */
+    .all-weather-sections-container {
         position: relative;
-        border-radius: 1rem;
+        border-radius: 1rem; /* rounded-2xl */
         overflow: hidden;
-        padding: 1.5rem;
+        padding: 1.5rem; /* p-6 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem; /* gap-6 entre les sections météo */
     }
 
     .weather-background-image {
@@ -34,8 +39,14 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.3;
+        opacity: 0.3; /* Opacité réduite */
         z-index: -1;
+    }
+
+    /* Ajuster la largeur des sections internes pour qu'elles prennent toute la largeur du conteneur */
+    .all-weather-sections-container > div {
+        width: 100%;
+        max-width: 100%; /* Important pour que les grilles remplissent l'espace */
     }
 
     .weather-content {
@@ -45,15 +56,40 @@
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
     }
+
+    /* Style des cartes météo à l'intérieur du fond */
+    .all-weather-sections-container .weather-card {
+        background-color: rgba(255, 255, 255, 0.7); /* Opacité ajustée pour les cartes à l'intérieur */
+        backdrop-filter: blur(5px);
+        border-radius: 1rem; /* rounded-2xl */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+        padding: 1.5rem; /* p-6 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .all-weather-sections-container .weather-weekly-card {
+        background-color: rgba(255, 255, 255, 0.7); /* Opacité ajustée pour les cartes à l'intérieur */
+        backdrop-filter: blur(5px);
+        border-radius: 0.75rem; /* rounded-xl */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        padding: 0.75rem; /* p-3 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-6">
   <h1 class="text-2xl font-bold mb-6 text-white text-shadow-lg">🌊 Surf Spots - Dakar (live)</h1>
 
-  <div class="card p-6 rounded-2xl shadow-xl w-full max-w-6xl mb-6 weather-container">
+  <div class="all-weather-sections-container w-full max-w-6xl mb-6 shadow-xl">
     <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Fond de ciel avec des nuages" class="weather-background-image">
-    <div class="weather-content">
-      <div id="weather-today" class="bg-white bg-opacity-50 p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+      <div id="weather-today" class="weather-card">
         <h2 class="text-xl font-bold mb-2">Aujourd'hui</h2>
         <div class="flex items-center space-x-4">
             <span class="text-4xl">🌤️</span>
@@ -68,7 +104,7 @@
         </div>
       </div>
 
-      <div id="weather-tomorrow" class="bg-white bg-opacity-50 p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
+      <div id="weather-tomorrow" class="weather-card">
         <h2 class="text-xl font-bold mb-2">Demain</h2>
         <div class="flex items-center space-x-4">
             <span class="text-4xl">☀️</span>
@@ -83,7 +119,7 @@
         </div>
       </div>
       
-      <div id="weather-hourly" class="bg-white bg-opacity-50 p-6 rounded-2xl shadow-xl md:col-span-2 lg:col-span-1">
+      <div id="weather-hourly" class="weather-card md:col-span-2 lg:col-span-1">
         <h3 class="text-md font-bold mb-2">Prochaines heures</h3>
         <div class="flex overflow-x-auto space-x-4 pb-2">
             <div class="text-center flex-shrink-0"><p class="text-sm">13:00</p><span class="text-xl">🌤️</span><p class="text-xs">28°C</p></div>
@@ -98,16 +134,16 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full max-w-6xl mb-6">
-    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Dim</p><span class="text-xl">☀️</span><p class="text-xs font-bold">30°C</p><p class="text-xs text-gray-600">25°C</p></div>
-    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Lun</p><span class="text-xl">☁️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
-    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Mar</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">28°C</p><p class="text-xs text-gray-600">23°C</p></div>
-    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Mer</p><span class="text-xl">☀️</span><p class="text-xs font-bold">31°C</p><p class="text-xs text-gray-600">26°C</p></div>
-    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Jeu</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
-    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Ven</p><span class="text-xl">☁️</span><p class="text-xs font-bold">27°C</p><p class="text-xs text-gray-600">22°C</p></div>
-    <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Sam</p><span class="text-xl">🌦️</span><p class="text-xs font-bold">26°C</p><p class="text-xs text-gray-600">21°C</p></div>
+    <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full">
+      <div class="weather-weekly-card"><p class="text-sm font-semibold mb-1">Dim</p><span class="text-xl">☀️</span><p class="text-xs font-bold">30°C</p><p class="text-xs text-gray-600">25°C</p></div>
+      <div class="weather-weekly-card"><p class="text-sm font-semibold mb-1">Lun</p><span class="text-xl">☁️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
+      <div class="weather-weekly-card"><p class="text-sm font-semibold mb-1">Mar</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">28°C</p><p class="text-xs text-gray-600">23°C</p></div>
+      <div class="weather-weekly-card"><p class="text-sm font-semibold mb-1">Mer</p><span class="text-xl">☀️</span><p class="text-xs font-bold">31°C</p><p class="text-xs text-gray-600">26°C</p></div>
+      <div class="weather-weekly-card"><p class="text-sm font-semibold mb-1">Jeu</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
+      <div class="weather-weekly-card"><p class="text-sm font-semibold mb-1">Ven</p><span class="text-xl">☁️</span><p class="text-xs font-bold">27°C</p><p class="text-xs text-gray-600">22°C</p></div>
+      <div class="weather-weekly-card"><p class="text-sm font-semibold mb-1">Sam</p><span class="text-xl">🌦️</span><p class="text-xs font-bold">26°C</p><p class="text-xs text-gray-600">21°C</p></div>
+    </div>
   </div>
   
   <div id="spots" class="grid md:grid-cols-3 gap-6 w-full max-w-6xl">
