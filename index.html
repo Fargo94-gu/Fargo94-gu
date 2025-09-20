@@ -12,34 +12,58 @@
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto;
         color: #075985;
     }
+    
     .card {
         background-color: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
     }
-    .arrow { display:inline-block; width:36px; height:36px; transform-origin: center center; transition: transform 0.4s ease; }
-    .spot-card { min-height:220px; }
+    
+    .arrow { 
+        display:inline-block; 
+        width:36px; 
+        height:36px; 
+        transform-origin: center center; 
+        transition: transform 0.4s ease; 
+    }
+    
+    .spot-card { 
+        min-height:220px; 
+    }
 
-    /* Conteneur principal pour toutes les sections météo avec le fond */
+    /* Styles pour le conteneur Météo */
     .all-weather-container {
         position: relative;
-        border-radius: 1rem; /* rounded-2xl */
+        border-radius: 1rem;
         overflow: hidden;
-        padding-top: 1.5rem; /* p-6 */
-        padding-bottom: 1.5rem; /* p-6 */
+        padding: 1.5rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1.5rem; /* gap-6 entre les sections météo */
-        width: 100%; /* Prend toute la largeur disponible */
-
-        /* Nouvelle méthode pour l'image de fond */
+        gap: 1.5rem;
+        width: 100%;
         background: url('https://images.unsplash.com/photo-1542171295-a13a44d081cb?q=80&w=2574&auto=format&fit=crop') no-repeat center center;
         background-size: cover;
     }
-    
-    /* Overlay pour ajuster l'opacité */
-    .all-weather-container::before {
+
+    /* Styles pour le conteneur Spots de Surf */
+    .all-spots-container {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+        margin-top: 1.5rem;
+        background: url('https://images.unsplash.com/photo-1517906915830-22c608ae3a49?q=80&w=2574&auto=format&fit=crop') no-repeat center center;
+        background-size: cover;
+    }
+
+    /* Overlay pour les deux conteneurs */
+    .all-weather-container::before, .all-spots-container::before {
         content: '';
         position: absolute;
         top: 0;
@@ -52,29 +76,22 @@
         z-index: 0;
     }
 
-    /* Le contenu à l'intérieur du conteneur doit être au-dessus de l'overlay */
-    .all-weather-container > * {
+    /* Assurez-vous que le contenu est au-dessus de l'overlay */
+    .all-weather-container > *, .all-spots-container > * {
         position: relative;
         z-index: 1;
     }
 
-    /* Ajuster la largeur des sections internes et ajouter des marges internes */
-    .all-weather-container > .px-6-override {
-        width: 100%;
-        max-width: 100%;
-        padding-left: 1.5rem; /* px-6 */
-        padding-right: 1.5rem; /* px-6 */
-    }
-
-    /* Style des cartes météo à l'intérieur du fond */
+    /* Style des cartes météo */
     .weather-card {
-        background-color: rgba(255, 255, 255, 0.4); /* Opacité ajustée */
+        background-color: rgba(255, 255, 255, 0.4);
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
         border-radius: 1rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         padding: 1.5rem;
     }
+
     .weather-weekly-card {
         background-color: rgba(255, 255, 255, 0.4);
         backdrop-filter: blur(5px);
@@ -89,10 +106,8 @@
   <h1 class="text-2xl font-bold mb-6 text-white text-shadow-lg">🌊 Surf Spots - Dakar (live)</h1>
 
   <div class="all-weather-container mb-6 shadow-xl">
-    
-    <h2 class="text-xl font-bold mb-4 text-center px-6-override">Météo</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6-override">
+    <h2 class="text-xl font-bold mb-4 text-center">Météo</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
       <div id="weather-today" class="weather-card flex flex-col items-center justify-center">
         <h3 class="text-xl font-bold mb-2">Aujourd'hui</h3>
         <div class="flex items-center space-x-4">
@@ -107,7 +122,6 @@
             <p>Vent : 25 km/h (NE)</p>
         </div>
       </div>
-
       <div id="weather-tomorrow" class="weather-card flex flex-col items-center justify-center">
         <h3 class="text-xl font-bold mb-2">Demain</h3>
         <div class="flex items-center space-x-4">
@@ -122,7 +136,6 @@
             <p>Vent : 22 km/h (N)</p>
         </div>
       </div>
-      
       <div id="weather-hourly" class="weather-card md:col-span-2 lg:col-span-1">
         <h3 class="text-md font-bold mb-2">Prochaines heures</h3>
         <div class="flex overflow-x-auto space-x-4 pb-2">
@@ -138,8 +151,7 @@
         </div>
       </div>
     </div>
-
-    <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 px-6-override mt-6">
+    <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full mt-6">
       <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Dim</p><span class="text-xl">☀️</span><p class="text-xs font-bold">30°C</p><p class="text-xs text-gray-600">25°C</p></div>
       <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Lun</p><span class="text-xl">☁️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
       <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Mar</p><span class="text-xl">🌤️</span><p class="text-xs font-bold">28°C</p><p class="text-xs text-gray-600">23°C</p></div>
@@ -149,97 +161,100 @@
       <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-sm font-semibold mb-1">Sam</p><span class="text-xl">🌦️</span><p class="text-xs font-bold">26°C</p><p class="text-xs text-gray-600">21°C</p></div>
     </div>
   </div>
-  
-  <div id="spots" class="grid md:grid-cols-3 gap-6 w-full max-w-6xl">
-    <div class="p-4 rounded-2xl shadow text-center spot-card card">
-        <h2 class="text-lg font-bold mb-2">Yoff</h2>
-        <div class="flex flex-col items-center mt-2">
-            <span class="text-4xl">🌊</span>
-            <div class="text-sm mt-1">taille = 1.2 m</div>
-            <div class="text-sm">période = 7.1 s</div>
-        </div>
-        <div class="mt-3 text-sm text-gray-700">
-            Vent : 20 km/h (NNE)
-        </div>
-        <div class="mt-2 flex justify-center" style="transform: rotate(22.5deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-        <div class="mt-3 text-xs text-gray-500">
-            Meilleure hauteur (48h) : 1.4 m
-        </div>
-    </div>
-    <div class="p-4 rounded-2xl shadow text-center spot-card card">
-        <h2 class="text-lg font-bold mb-2">Les Almadies</h2>
-        <div class="flex flex-col items-center mt-2">
-            <span class="text-4xl">🌊</span>
-            <div class="text-sm mt-1">taille = 1.4 m</div>
-            <div class="text-sm">période = 8.5 s</div>
-        </div>
-        <div class="mt-3 text-sm text-gray-700">
-            Vent : 25 km/h (N)
-        </div>
-        <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-        <div class="mt-3 text-xs text-gray-500">
-            Meilleure hauteur (48h) : 1.6 m
-        </div>
-    </div>
-    <div class="p-4 rounded-2xl shadow text-center spot-card card">
-        <h2 class="text-lg font-bold mb-2">Le Virage</h2>
-        <div class="flex flex-col items-center mt-2">
-            <span class="text-4xl">🌊</span>
-            <div class="text-sm mt-1">taille = 1.1 m</div>
-            <div class="text-sm">période = 6.9 s</div>
-        </div>
-        <div class="mt-3 text-sm text-gray-700">
-            Vent : 18 km/h (NE)
-        </div>
-        <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-        <div class="mt-3 text-xs text-gray-500">
-            Meilleure hauteur (48h) : 1.3 m
-        </div>
-    </div>
-    <div class="p-4 rounded-2xl shadow text-center spot-card card">
-        <h2 class="text-lg font-bold mb-2">Ngor</h2>
-        <div class="flex flex-col items-center mt-2">
-            <span class="text-4xl">🌊</span>
-            <div class="text-sm mt-1">taille = 1.0 m</div>
-            <div class="text-sm">période = 7.5 s</div>
-        </div>
-        <div class="mt-3 text-sm text-gray-700">
-            Vent : 22 km/h (N)
-        </div>
-        <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-        <div class="mt-3 text-xs text-gray-500">
-            Meilleure hauteur (48h) : 1.1 m
-        </div>
-    </div>
-    <div class="p-4 rounded-2xl shadow text-center spot-card card">
-        <h2 class="text-lg font-bold mb-2">Ouakam</h2>
-        <div class="flex flex-col items-center mt-2">
-            <span class="text-4xl">🌊</span>
-            <div class="text-sm mt-1">taille = 1.3 m</div>
-            <div class="text-sm">période = 7.8 s</div>
-        </div>
-        <div class="mt-3 text-sm text-gray-700">
-            Vent : 21 km/h (NE)
-        </div>
-        <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-        <div class="mt-3 text-xs text-gray-500">
-            Meilleure hauteur (48h) : 1.5 m
-        </div>
-    </div>
-    <div class="p-4 rounded-2xl shadow text-center spot-card card">
-        <h2 class="text-lg font-bold mb-2">Secret Spot</h2>
-        <div class="flex flex-col items-center mt-2">
-            <span class="text-4xl">🌊</span>
-            <div class="text-sm mt-1">taille = 1.0 m</div>
-            <div class="text-sm">période = 6.5 s</div>
-        </div>
-        <div class="mt-3 text-sm text-gray-700">
-            Vent : 19 km/h (E)
-        </div>
-        <div class="mt-2 flex justify-center" style="transform: rotate(90deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-        <div class="mt-3 text-xs text-gray-500">
-            Meilleure hauteur (48h) : 1.2 m
-        </div>
+
+  <div class="all-spots-container shadow-xl">
+    <h2 class="text-xl font-bold mb-4 text-center">Spots de Surf</h2>
+    <div id="spots" class="grid md:grid-cols-3 gap-6 w-full">
+      <div class="p-4 rounded-2xl shadow text-center spot-card card">
+          <h2 class="text-lg font-bold mb-2">Yoff</h2>
+          <div class="flex flex-col items-center mt-2">
+              <span class="text-4xl">🌊</span>
+              <div class="text-sm mt-1">taille = 1.2 m</div>
+              <div class="text-sm">période = 7.1 s</div>
+          </div>
+          <div class="mt-3 text-sm text-gray-700">
+              Vent : 20 km/h (NNE)
+          </div>
+          <div class="mt-2 flex justify-center" style="transform: rotate(22.5deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+          <div class="mt-3 text-xs text-gray-500">
+              Meilleure hauteur (48h) : 1.4 m
+          </div>
+      </div>
+      <div class="p-4 rounded-2xl shadow text-center spot-card card">
+          <h2 class="text-lg font-bold mb-2">Les Almadies</h2>
+          <div class="flex flex-col items-center mt-2">
+              <span class="text-4xl">🌊</span>
+              <div class="text-sm mt-1">taille = 1.4 m</div>
+              <div class="text-sm">période = 8.5 s</div>
+          </div>
+          <div class="mt-3 text-sm text-gray-700">
+              Vent : 25 km/h (N)
+          </div>
+          <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+          <div class="mt-3 text-xs text-gray-500">
+              Meilleure hauteur (48h) : 1.6 m
+          </div>
+      </div>
+      <div class="p-4 rounded-2xl shadow text-center spot-card card">
+          <h2 class="text-lg font-bold mb-2">Le Virage</h2>
+          <div class="flex flex-col items-center mt-2">
+              <span class="text-4xl">🌊</span>
+              <div class="text-sm mt-1">taille = 1.1 m</div>
+              <div class="text-sm">période = 6.9 s</div>
+          </div>
+          <div class="mt-3 text-sm text-gray-700">
+              Vent : 18 km/h (NE)
+          </div>
+          <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+          <div class="mt-3 text-xs text-gray-500">
+              Meilleure hauteur (48h) : 1.3 m
+          </div>
+      </div>
+      <div class="p-4 rounded-2xl shadow text-center spot-card card">
+          <h2 class="text-lg font-bold mb-2">Ngor</h2>
+          <div class="flex flex-col items-center mt-2">
+              <span class="text-4xl">🌊</span>
+              <div class="text-sm mt-1">taille = 1.0 m</div>
+              <div class="text-sm">période = 7.5 s</div>
+          </div>
+          <div class="mt-3 text-sm text-gray-700">
+              Vent : 22 km/h (N)
+          </div>
+          <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+          <div class="mt-3 text-xs text-gray-500">
+              Meilleure hauteur (48h) : 1.1 m
+          </div>
+      </div>
+      <div class="p-4 rounded-2xl shadow text-center spot-card card">
+          <h2 class="text-lg font-bold mb-2">Ouakam</h2>
+          <div class="flex flex-col items-center mt-2">
+              <span class="text-4xl">🌊</span>
+              <div class="text-sm mt-1">taille = 1.3 m</div>
+              <div class="text-sm">période = 7.8 s</div>
+          </div>
+          <div class="mt-3 text-sm text-gray-700">
+              Vent : 21 km/h (NE)
+          </div>
+          <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+          <div class="mt-3 text-xs text-gray-500">
+              Meilleure hauteur (48h) : 1.5 m
+          </div>
+      </div>
+      <div class="p-4 rounded-2xl shadow text-center spot-card card">
+          <h2 class="text-lg font-bold mb-2">Secret Spot</h2>
+          <div class="flex flex-col items-center mt-2">
+              <span class="text-4xl">🌊</span>
+              <div class="text-sm mt-1">taille = 1.0 m</div>
+              <div class="text-sm">période = 6.5 s</div>
+          </div>
+          <div class="mt-3 text-sm text-gray-700">
+              Vent : 19 km/h (E)
+          </div>
+          <div class="mt-2 flex justify-center" style="transform: rotate(90deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
+          <div class="mt-3 text-xs text-gray-500">
+              Meilleure hauteur (48h) : 1.2 m
+          </div>
+      </div>
     </div>
   </div>
 
