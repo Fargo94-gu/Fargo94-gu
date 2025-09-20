@@ -74,7 +74,7 @@
       </svg>`;
     }
     
-    function getWeatherIcon(iconCode) {
+    function getWeatherIcon(code) {
         const iconMap = {
             0: '☀️', 1: '🌤️', 2: '☁️', 3: '🌥️',
             45: '🌫️', 48: '🌫️', 51: '🌧️', 53: '🌧️',
@@ -85,7 +85,7 @@
             81: '🌧️', 82: '🌧️', 85: '🌨️',
             86: '🌨️', 95: '⛈️', 96: '⛈️', 99: '⛈️'
         };
-        return iconMap[iconCode] || '❓';
+        return iconMap[code] || '❓';
     }
 
     function getWeatherDescription(code) {
@@ -119,14 +119,19 @@
         }
         const data = await res.json();
         
-        // --- Vérification des données avant l'affichage ---
+        // --- Correction de la logique pour les données quotidiennes et horaires ---
         if (!data.daily || !data.hourly || data.daily.time.length < 2 || data.hourly.time.length < 24) {
             throw new Error("Données météo incomplètes");
         }
         
-        // Aujourd'hui
         const currentHourIndex = data.hourly.time.findIndex(time => new Date(time) >= new Date());
-        const todayForecast = data.daily.find(day => new Date(day.time) >= new Date()); // Trouvez le bon jour
+        
+        // Aujourd'hui
+        const todayForecast = {
+            weather_code: data.daily.weather_code[0],
+            temperature_2m_min: data.daily.temperature_2m_min[0],
+            temperature_2m_max: data.daily.temperature_2m_max[0]
+        };
         const currentHourData = data.hourly.temperature_2m[currentHourIndex];
         
         todayDiv.innerHTML = `
@@ -145,7 +150,11 @@
         `;
         
         // Demain
-        const tomorrowForecast = data.daily[1];
+        const tomorrowForecast = {
+            weather_code: data.daily.weather_code[1],
+            temperature_2m_min: data.daily.temperature_2m_min[1],
+            temperature_2m_max: data.daily.temperature_2m_max[1]
+        };
         tomorrowDiv.innerHTML = `
           <h2 class="text-xl font-bold mb-2">Demain</h2>
           <div class="flex items-center space-x-4">
@@ -181,7 +190,11 @@
         let weeklyHtml = '';
         const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
         for (let i = 1; i < 8; i++) {
-          const dayData = data.daily[i];
+          const dayData = {
+              weather_code: data.daily.weather_code[i],
+              temperature_2m_min: data.daily.temperature_2m_min[i],
+              temperature_2m_max: data.daily.temperature_2m_max[i]
+          };
           const dayIndex = (new Date().getDay() + i) % 7;
           weeklyHtml += `
             <div class="card p-3 rounded-xl shadow-md flex flex-col items-center text-center">
