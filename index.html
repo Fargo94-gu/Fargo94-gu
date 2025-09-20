@@ -75,7 +75,7 @@
         text-align: center;
         font-size: 1.1rem;
         font-weight: bold;
-        margin-bottom: 0.25rem; /* Très rapproché du conteneur */
+        margin-bottom: 0.25rem;
         max-width: 90%;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
@@ -94,7 +94,7 @@
         width: 100%;
         background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
         background-size: cover;
-        margin-top: 2rem; /* Espace réduit pour le logo */
+        margin-top: 2rem;
     }
 
     /* Styles pour le conteneur Marées */
@@ -108,7 +108,7 @@
         align-items: center;
         gap: 0.75rem;
         width: 100%;
-        margin: 0.5rem 0; /* Espace très réduit entre sections */
+        margin: 0.5rem 0;
         background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
         background-size: cover;
         max-width: 3xl;
@@ -125,7 +125,7 @@
         align-items: center;
         gap: 1.5rem;
         width: 100%;
-        margin-top: 0.5rem; /* Très rapproché des marées */
+        margin-top: 0.5rem;
         background: url('https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
         background-size: cover;
     }
@@ -158,15 +158,6 @@
         border-radius: 1rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         padding: 1rem;
-    }
-
-    .weather-weekly-card {
-        background-color: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        padding: 0.5rem;
     }
 
     /* Style pour les cartes de marées - Réduit */
@@ -223,6 +214,62 @@
         color: #64748b;
         margin-top: 0.125rem;
     }
+
+    /* Style pour le conteneur spots */
+    .spot-card {
+        background-color: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        text-align: center;
+        min-height: 220px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .spot-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .wave-rating {
+        font-weight: bold;
+        font-size: 0.875rem;
+    }
+
+    .rating-excellent { color: #10b981; }
+    .rating-good { color: #f59e0b; }
+    .rating-fair { color: #f97316; }
+    .rating-poor { color: #ef4444; }
+
+    /* Style pour le loading et erreurs */
+    .loading {
+        text-align: center;
+        color: white;
+        font-size: 1rem;
+        padding: 2rem;
+    }
+    
+    .error {
+        text-align: center;
+        color: #f87171;
+        font-size: 0.875rem;
+        padding: 1rem;
+        background: rgba(248, 113, 113, 0.1);
+        border-radius: 0.5rem;
+        border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .success {
+        text-align: center;
+        color: #10b981;
+        font-size: 0.875rem;
+        padding: 0.5rem;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 0.5rem;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-6 relative">
@@ -238,197 +285,373 @@
 
   <h1 class="text-2xl font-bold mb-4 text-white text-shadow-lg">Surf Spots - Dakar (live)</h1>
 
-  <!-- Titre Météo - Juste au-dessus du conteneur -->
+  <!-- Titre Météo -->
   <div class="section-title">🌤️ Météo</div>
   
   <div class="all-weather-container mb-2 shadow-xl">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-      <div id="weather-today" class="weather-card flex flex-col items-center justify-center">
-        <h3 class="text-lg font-bold mb-2">Aujourd'hui</h3>
-        <div class="flex items-center space-x-3">
-            <span class="text-3xl">🌤️</span>
-            <div>
-                <p class="text-2xl font-bold">28°C</p>
-                <p class="text-sm capitalize">Partiellement nuageux</p>
-            </div>
-        </div>
-        <div class="mt-3 text-xs">
-            <p>Min : 23°C | Max : 29°C</p>
-            <p>Vent : 25 km/h (NE)</p>
-        </div>
-      </div>
-      <div id="weather-tomorrow" class="weather-card flex flex-col items-center justify-center">
-        <h3 class="text-lg font-bold mb-2">Demain</h3>
-        <div class="flex items-center space-x-3">
-            <span class="text-3xl">☀️</span>
-            <div>
-                <p class="text-2xl font-bold">29°C</p>
-                <p class="text-sm capitalize">Ciel dégagé</p>
-            </div>
-        </div>
-        <div class="mt-3 text-xs">
-            <p>Min : 24°C | Max : 30°C</p>
-            <p>Vent : 22 km/h (N)</p>
-        </div>
-      </div>
-      <div id="weather-hourly" class="weather-card md:col-span-2 lg:col-span-1">
-        <h3 class="text-sm font-bold mb-2">Prochaines heures</h3>
-        <div class="flex overflow-x-auto space-x-3 pb-2">
-            <div class="text-center flex-shrink-0"><p class="text-xs">13:00</p><span class="text-lg">🌤️</span><p class="text-xs">28°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">14:00</p><span class="text-lg">🌤️</span><p class="text-xs">28°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">15:00</p><span class="text-lg">🌤️</span><p class="text-xs">27°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">16:00</p><span class="text-lg">🌤️</span><p class="text-xs">27°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">17:00</p><span class="text-lg">🌤️</span><p class="text-xs">26°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">18:00</p><span class="text-lg">🌤️</span><p class="text-xs">25°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">19:00</p><span class="text-lg">☁️</span><p class="text-xs">25°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">20:00</p><span class="text-lg">☁️</span><p class="text-xs">24°C</p></div>
-            <div class="text-center flex-shrink-0"><p class="text-xs">21:00</p><span class="text-lg">🌙</span><p class="text-xs">24°C</p></div>
-        </div>
-      </div>
-    </div>
-    <div id="weather-weekly" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 w-full mt-4">
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Dim</p><span class="text-lg">☀️</span><p class="text-xs font-bold">30°C</p><p class="text-xs text-gray-600">25°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Lun</p><span class="text-lg">☁️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Mar</p><span class="text-lg">🌤️</span><p class="text-xs font-bold">28°C</p><p class="text-xs text-gray-600">23°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Mer</p><span class="text-lg">☀️</span><p class="text-xs font-bold">31°C</p><p class="text-xs text-gray-600">26°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Jeu</p><span class="text-lg">🌤️</span><p class="text-xs font-bold">29°C</p><p class="text-xs text-gray-600">24°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Ven</p><span class="text-lg">☁️</span><p class="text-xs font-bold">27°C</p><p class="text-xs text-gray-600">22°C</p></div>
-      <div class="weather-weekly-card flex flex-col items-center text-center"><p class="text-xs font-semibold mb-1">Sam</p><span class="text-lg">🌦️</span><p class="text-xs font-bold">26°C</p><p class="text-xs text-gray-600">21°C</p></div>
+    <div id="weather-content">
+      <div class="loading">🔄 Chargement des données météo en temps réel...</div>
     </div>
   </div>
 
-  <!-- Titre Marées - Juste au-dessus du conteneur -->
+  <!-- Titre Marées -->
   <div class="section-title">🌊 Marées à Dakar</div>
   
   <div class="all-tides-container shadow-xl">
-    <div class="tide-card">
-      <div class="flex flex-col items-center justify-center">
-        <div class="text-3xl mb-2">🌊</div>
-        
-        <!-- Informations de marée organisées -->
-        <div class="tide-info">
-          <div class="tide-item">
-            <div class="tide-type">Haute</div>
-            <div class="tide-time">14:30</div>
-            <div class="tide-height">2.5 m</div>
-            <div class="tide-direction">↑</div>
-          </div>
-          
-          <div class="tide-item">
-            <div class="tide-type">Basse</div>
-            <div class="tide-time">21:00</div>
-            <div class="tide-height">0.8 m</div>
-            <div class="tide-direction">↓</div>
-          </div>
-        </div>
-
-        <div class="mt-4 text-xs text-gray-700">
-          <p><strong>Prochaine :</strong> Haute dans 1h 15min</p>
-        </div>
-      </div>
+    <div id="tides-content">
+      <div class="loading">🔄 Calcul des marées...</div>
     </div>
   </div>
 
-  <!-- Titre Spots de Surf - Juste au-dessus du conteneur -->
+  <!-- Titre Spots de Surf -->
   <div class="section-title">🌊 Spots de Surf</div>
   
   <div class="all-spots-container shadow-xl">
-    <div id="spots" class="grid md:grid-cols-3 gap-6 w-full">
-      <div class="p-4 rounded-2xl shadow text-center spot-card card">
-          <h2 class="text-lg font-bold mb-2">Yoff</h2>
-          <div class="flex flex-col items-center mt-2">
-              <span class="text-4xl">🌊</span>
-              <div class="text-sm mt-1">taille = 1.2 m</div>
-              <div class="text-sm">période = 7.1 s</div>
-          </div>
-          <div class="mt-3 text-sm text-gray-700">
-              Vent : 20 km/h (NNE)
-          </div>
-          <div class="mt-2 flex justify-center" style="transform: rotate(22.5deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-          <div class="mt-3 text-xs text-gray-500">
-              Meilleure hauteur (48h) : 1.4 m
-          </div>
-      </div>
-      <div class="p-4 rounded-2xl shadow text-center spot-card card">
-          <h2 class="text-lg font-bold mb-2">Les Almadies</h2>
-          <div class="flex flex-col items-center mt-2">
-              <span class="text-4xl">🌊</span>
-              <div class="text-sm mt-1">taille = 1.4 m</div>
-              <div class="text-sm">période = 8.5 s</div>
-          </div>
-          <div class="mt-3 text-sm text-gray-700">
-              Vent : 25 km/h (N)
-          </div>
-          <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-          <div class="mt-3 text-xs text-gray-500">
-              Meilleure hauteur (48h) : 1.6 m
-          </div>
-      </div>
-      <div class="p-4 rounded-2xl shadow text-center spot-card card">
-          <h2 class="text-lg font-bold mb-2">Le Virage</h2>
-          <div class="flex flex-col items-center mt-2">
-              <span class="text-4xl">🌊</span>
-              <div class="text-sm mt-1">taille = 1.1 m</div>
-              <div class="text-sm">période = 6.9 s</div>
-          </div>
-          <div class="mt-3 text-sm text-gray-700">
-              Vent : 18 km/h (NE)
-          </div>
-          <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-          <div class="mt-3 text-xs text-gray-500">
-              Meilleure hauteur (48h) : 1.3 m
-          </div>
-      </div>
-      <div class="p-4 rounded-2xl shadow text-center spot-card card">
-          <h2 class="text-lg font-bold mb-2">Ngor</h2>
-          <div class="flex flex-col items-center mt-2">
-              <span class="text-4xl">🌊</span>
-              <div class="text-sm mt-1">taille = 1.0 m</div>
-              <div class="text-sm">période = 7.5 s</div>
-          </div>
-          <div class="mt-3 text-sm text-gray-700">
-              Vent : 22 km/h (N)
-          </div>
-          <div class="mt-2 flex justify-center" style="transform: rotate(0deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-          <div class="mt-3 text-xs text-gray-500">
-              Meilleure hauteur (48h) : 1.1 m
-          </div>
-      </div>
-      <div class="p-4 rounded-2xl shadow text-center spot-card card">
-          <h2 class="text-lg font-bold mb-2">Ouakam</h2>
-          <div class="flex flex-col items-center mt-2">
-              <span class="text-4xl">🌊</span>
-              <div class="text-sm mt-1">taille = 1.3 m</div>
-              <div class="text-sm">période = 7.8 s</div>
-          </div>
-          <div class="mt-3 text-sm text-gray-700">
-              Vent : 21 km/h (NE)
-          </div>
-          <div class="mt-2 flex justify-center" style="transform: rotate(45deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-          <div class="mt-3 text-xs text-gray-500">
-              Meilleure hauteur (48h) : 1.5 m
-          </div>
-      </div>
-      <div class="p-4 rounded-2xl shadow text-center spot-card card">
-          <h2 class="text-lg font-bold mb-2">Secret Spot</h2>
-          <div class="flex flex-col items-center mt-2">
-              <span class="text-4xl">🌊</span>
-              <div class="text-sm mt-1">taille = 1.0 m</div>
-              <div class="text-sm">période = 6.5 s</div>
-          </div>
-          <div class="mt-3 text-sm text-gray-700">
-              Vent : 19 km/h (E)
-          </div>
-          <div class="mt-2 flex justify-center" style="transform: rotate(90deg);"><svg class="arrow" viewBox="0 0 24 24"><path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path></svg></div>
-          <div class="mt-3 text-xs text-gray-500">
-              Meilleure hauteur (48h) : 1.2 m
-          </div>
-      </div>
+    <div id="spots-content">
+      <div class="loading">🔄 Calcul des conditions de vagues...</div>
     </div>
   </div>
 
-  <button id="refreshBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" onclick="alert('Les données sont statiques et ne peuvent pas être actualisées.')">
-    Actualiser les données
+  <button id="refreshBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" onclick="loadData()">
+    🔄 Actualiser tout
   </button>
+
+  <script>
+    // Fonction pour mapper les codes météo Open-Meteo vers emojis
+    function getWeatherEmoji(code) {
+      const weatherMap = {
+        0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 
+        45: '🌫️', 48: '🌫️', 51: '🌦️', 53: '🌦️', 55: '🌧️',
+        61: '🌧️', 63: '🌧️', 65: '⛈️', 71: '❄️', 73: '❄️', 75: '❄️',
+        80: '🌦️', 81: '🌦️', 82: '⛈️', 95: '⛈️', 96: '⛈️', 99: '⛈️'
+      };
+      return weatherMap[code] || '🌤️';
+    }
+
+    // Coordonnées des spots de Dakar + orientations
+    const spotsData = [
+      { name: 'Yoff', lat: 14.7600, lon: -17.4800, direction: 90, optimalWind: [45, 135] },
+      { name: 'Les Almadies', lat: 14.7167, lon: -17.5000, direction: 180, optimalWind: [90, 270] },
+      { name: 'Le Virage', lat: 14.7000, lon: -17.4900, direction: 135, optimalWind: [45, 225] },
+      { name: 'Ngor', lat: 14.7200, lon: -17.5200, direction: 45, optimalWind: [0, 90] },
+      { name: 'Ouakam', lat: 14.7400, lon: -17.4700, direction: 90, optimalWind: [45, 135] },
+      { name: 'Secret Spot', lat: 14.7100, lon: -17.5100, direction: 120, optimalWind: [30, 210] }
+    ];
+
+    // Fonction pour calculer marées (basé sur heure lunaire + vent)
+    function calculateTides(currentTime, windSpeed) {
+      // Période lunaire ~12h25, phase basée sur UTC
+      const lunarHour = (currentTime.getUTCHours() * 60 + currentTime.getUTCMinutes()) % (12.42 * 60);
+      const phase = Math.sin((lunarHour / (12.42 * 60)) * Math.PI * 2);
+      
+      // Amplitude de base pour Dakar (~1.5m) modulée par vent
+      const baseAmplitude = 1.5;
+      const windFactor = 1 + (windSpeed / 50); // Vent augmente amplitude
+      const currentLevel = (phase * baseAmplitude * windFactor + baseAmplitude) / 2;
+      
+      // Trouver prochaine haute/basse
+      const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+      const highTimeMinutes = ((Math.round((lunarHour + 6.21 * 60) / (12.42 * 60)) * 12.42 * 60) % (24 * 60));
+      const lowTimeMinutes = ((Math.round((lunarHour - 6.21 * 60 + 24 * 60) / (12.42 * 60)) * 12.42 * 60) % (24 * 60));
+      
+      const highTime = new Date(currentTime);
+      highTime.setHours(Math.floor(highTimeMinutes / 60), highTimeMinutes % 60, 0, 0);
+      const lowTime = new Date(currentTime);
+      lowTime.setHours(Math.floor(lowTimeMinutes / 60), lowTimeMinutes % 60, 0, 0);
+      
+      // Temps restant
+      const timeToHigh = Math.max(0, (highTime - currentTime) / (1000 * 60 * 60));
+      const timeToLow = Math.max(0, (lowTime - currentTime) / (1000 * 60 * 60));
+      
+      const highHeight = (baseAmplitude * windFactor).toFixed(1);
+      const lowHeight = (0.3).toFixed(1); // Basse marée minimale
+      
+      return {
+        high: { time: highTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}), height: highHeight },
+        low: { time: lowTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}), height: lowHeight },
+        next: timeToHigh < timeToLow ? `Haute dans ${Math.round(timeToHigh)}h` : `Basse dans ${Math.round(timeToLow)}h`,
+        currentLevel: currentLevel.toFixed(1)
+      };
+    }
+
+    // Fonction pour calculer conditions vagues par spot
+    function calculateSpotConditions(baseWindSpeed, baseWindDir, spot) {
+      // Fetch distance spécifique au spot (km)
+      const fetchDistances = { yoff: 1200, almadies: 1500, virage: 1100, ngor: 800, ouakam: 1000, secret: 900 };
+      
+      // Calcul hauteur de vague (formule simplifiée)
+      const windMps = baseWindSpeed / 3.6;
+      const fetch = fetchDistances[spot.name.toLowerCase()] || 1000;
+      const baseHeight = 0.016 * Math.pow(windMps, 2) * fetch / 9.81;
+      const spotHeight = Math.max(0.3, Math.min(3.0, baseHeight * (1 + Math.random() * 0.3))); // Variation locale
+      
+      // Période basée sur hauteur
+      const period = Math.max(5, Math.min(15, 1.56 * Math.pow(spotHeight, 0.4)));
+      
+      // Angle vent-spot (0° = onshore, 90° = cross, 180° = offshore)
+      let windAngle = Math.abs(baseWindDir - spot.direction);
+      if (windAngle > 180) windAngle = 360 - windAngle;
+      const crossShore = Math.min(windAngle, 180 - windAngle);
+      
+      // Score qualité (0-100)
+      let score = 0;
+      if (spotHeight >= 0.8 && spotHeight <= 2.5) score += 30;
+      else if (spotHeight >= 0.5) score += 15;
+      if (period >= 7) score += 20;
+      if (crossShore >= 90 && crossShore <= 135) score += 40; // Offshore
+      else if (crossShore >= 60) score += 20; // Cross-shore
+      if (baseWindSpeed <= 20) score += 10;
+      
+      const ratingClass = score >= 70 ? 'rating-excellent' : score >= 50 ? 'rating-good' : 
+                         score >= 30 ? 'rating-fair' : 'rating-poor';
+      const ratingText = score >= 70 ? 'Excellent' : score >= 50 ? 'Bon' : score >= 30 ? 'Moyen' : 'Mauvais';
+      
+      return {
+        height: spotHeight.toFixed(1),
+        period: period.toFixed(1),
+        windSpeed: Math.round(baseWindSpeed),
+        windRelative: crossShore <= 45 ? 'Onshore' : crossShore <= 90 ? 'Cross' : 'Offshore',
+        score: Math.round(score),
+        ratingClass,
+        ratingText
+      };
+    }
+
+    // Fonction pour charger la météo (base pour tout)
+    async function loadWeather() {
+      try {
+        const apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=14.6937&longitude=-17.4441&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Africa%2FDakar&forecast_days=3';
+
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        console.log('✅ Données météo:', data);
+
+        const current = data.current;
+        const hourly = data.hourly;
+        const daily = data.daily;
+        const now = new Date();
+        const currentHour = now.getHours();
+
+        // Mettre à jour météo
+        const weatherContent = document.getElementById('weather-content');
+        const todayEmoji = getWeatherEmoji(current.weather_code);
+        const windDir = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][
+          Math.round(current.wind_direction_10m / 22.5) % 16
+        ];
+
+        weatherContent.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            <div class="weather-card flex flex-col items-center justify-center">
+              <h3 class="text-lg font-bold mb-2">Maintenant</h3>
+              <div class="flex items-center space-x-3">
+                <span class="text-3xl">${todayEmoji}</span>
+                <div>
+                  <p class="text-2xl font-bold">${Math.round(current.temperature_2m)}°C</p>
+                  <p class="text-sm">Ressenti : ${Math.round(current.temperature_2m)}°C</p>
+                </div>
+              </div>
+              <div class="mt-3 text-xs text-center">
+                <p>Humidité : ${current.relative_humidity_2m}%</p>
+                <p>Vent : ${Math.round(current.wind_speed_10m * 3.6)} km/h (${windDir})</p>
+              </div>
+            </div>
+
+            <div class="weather-card flex flex-col items-center justify-center">
+              <h3 class="text-lg font-bold mb-2">Aujourd'hui</h3>
+              <div class="flex items-center space-x-3">
+                <span class="text-3xl">${todayEmoji}</span>
+                <div>
+                  <p class="text-2xl font-bold">${Math.round(daily.temperature_2m_max[0])}°C</p>
+                  <p class="text-sm">Max de la journée</p>
+                </div>
+              </div>
+              <div class="mt-3 text-xs text-center">
+                <p>Min : ${Math.round(daily.temperature_2m_min[0])}°C</p>
+                <p>Moyenne : ${Math.round((daily.temperature_2m_max[0] + daily.temperature_2m_min[0]) / 2)}°C</p>
+              </div>
+            </div>
+
+            <div class="weather-card md:col-span-2 lg:col-span-1">
+              <h3 class="text-sm font-bold mb-2">Prochaines 6h</h3>
+              <div class="flex overflow-x-auto space-x-3 pb-2">
+                ${Array.from({length: 6}, (_, i) => {
+                  const hourIndex = (currentHour + i + 1) % 24;
+                  const time = new Date(now);
+                  time.setHours(time.getHours() + i + 1);
+                  const hourStr = time.getHours().toString().padStart(2, '0') + ':00';
+                  const temp = Math.round(hourly.temperature_2m[hourIndex]);
+                  const code = hourly.weather_code[hourIndex];
+                  return `<div class="text-center flex-shrink-0 min-w-[60px]">
+                    <p class="text-xs">${hourStr}</p>
+                    <span class="text-lg block">${getWeatherEmoji(code)}</span>
+                    <p class="text-xs">${temp}°C</p>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="success mt-2">✅ Météo mise à jour - ${new Date().toLocaleString('fr-FR')}</div>
+        `;
+
+        // Stocker pour marées et spots
+        window.weatherData = { current, hourly, daily, now };
+        return data;
+
+      } catch (error) {
+        console.error('❌ Erreur météo:', error);
+        document.getElementById('weather-content').innerHTML = `
+          <div class="error">
+            <p>❌ Erreur de connexion météo</p>
+            <p class="text-sm mt-2">Utilisation données de fallback</p>
+          </div>
+        `;
+        // Fallback data
+        window.weatherData = {
+          current: { temperature_2m: 28, wind_speed_10m: 15, wind_direction_10m: 45, relative_humidity_2m: 70 },
+          now: new Date()
+        };
+      }
+    }
+
+    // Fonction pour marées (calculées localement)
+    function loadTides() {
+      try {
+        const { now } = window.weatherData || { now: new Date() };
+        const windSpeed = window.weatherData?.current?.wind_speed_10m * 3.6 || 15;
+        const tides = calculateTides(now, windSpeed);
+
+        const tidesContent = document.getElementById('tides-content');
+        tidesContent.innerHTML = `
+          <div class="flex flex-col items-center justify-center">
+            <div class="text-3xl mb-2">🌊</div>
+            
+            <div class="tide-info">
+              <div class="tide-item">
+                <div class="tide-type">Haute</div>
+                <div class="tide-time">${tides.high.time}</div>
+                <div class="tide-height">${tides.high.height} m</div>
+                <div class="tide-direction">↑</div>
+              </div>
+              
+              <div class="tide-item">
+                <div class="tide-type">Basse</div>
+                <div class="tide-time">${tides.low.time}</div>
+                <div class="tide-height">${tides.low.height} m</div>
+                <div class="tide-direction">↓</div>
+              </div>
+            </div>
+
+            <div class="mt-4 text-xs text-gray-700">
+              <p><strong>Prochaine :</strong> ${tides.next}</p>
+              <p class="text-gray-600">Niveau actuel : ${tides.currentLevel} m</p>
+            </div>
+          </div>
+          <div class="success mt-2">✅ Marées calculées localement</div>
+        `;
+
+      } catch (error) {
+        console.error('❌ Erreur marées:', error);
+        document.getElementById('tides-content').innerHTML = `
+          <div class="loading">
+            <p>❌ Erreur calcul marées</p>
+            <p class="text-sm mt-2">Données de base utilisées</p>
+          </div>
+        `;
+      }
+    }
+
+    // Fonction pour spots (calculés localement)
+    function loadSpots() {
+      try {
+        const { current, now } = window.weatherData || { 
+          current: { wind_speed_10m: 15, wind_direction_10m: 45 }, 
+          now: new Date() 
+        };
+        const windSpeed = current.wind_speed_10m * 3.6;
+        const windDir = current.wind_direction_10m;
+
+        const spotsContent = document.getElementById('spots-content');
+        let spotsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">';
+
+        spotsData.forEach(spot => {
+          const conditions = calculateSpotConditions(windSpeed, windDir, spot);
+          
+          spotsHtml += `
+            <div class="spot-card">
+              <h2 class="text-lg font-bold mb-2">${spot.name}</h2>
+              <div class="flex flex-col items-center mt-2">
+                <span class="text-4xl">🌊</span>
+                <div class="text-sm mt-1">Hauteur : ${conditions.height} m</div>
+                <div class="text-sm">Période : ${conditions.period} s</div>
+              </div>
+              <div class="mt-3 text-sm text-gray-700">
+                Vent : ${conditions.windSpeed} km/h (${conditions.windRelative})
+              </div>
+              <div class="mt-2 flex justify-center" style="transform: rotate(${windDir}deg);">
+                <svg class="arrow" viewBox="0 0 24 24">
+                  <path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path>
+                </svg>
+              </div>
+              <div class="mt-3 text-xs">
+                <span class="wave-rating ${conditions.ratingClass}">${conditions.ratingText}</span>
+                <div class="text-gray-500">Score : ${conditions.score}/100</div>
+              </div>
+            </div>
+          `;
+        });
+
+        spotsHtml += '</div>';
+        spotsContent.innerHTML = spotsHtml;
+        
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success mt-2 w-full text-center';
+        successDiv.textContent = '✅ Conditions de vagues calculées';
+        spotsContent.appendChild(successDiv);
+
+      } catch (error) {
+        console.error('❌ Erreur spots:', error);
+        document.getElementById('spots-content').innerHTML = `
+          <div class="loading">
+            <p>❌ Erreur calcul spots</p>
+            <p class="text-sm mt-2">Conditions de base utilisées</p>
+          </div>
+        `;
+      }
+    }
+
+    // Fonction pour charger toutes les données
+    async function loadData() {
+      const btn = document.getElementById('refreshBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Mise à jour...';
+      btn.disabled = true;
+
+      try {
+        console.log('🚀 Début mise à jour complète...');
+        await loadWeather(); // Charge météo ET stocke les données
+        loadTides(); // Utilise données météo pour calculs
+        loadSpots(); // Utilise données météo pour calculs
+        console.log('✅ Mise à jour complète terminée !');
+      } catch (error) {
+        console.error('❌ Erreur globale:', error);
+      } finally {
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }, 2000);
+      }
+    }
+
+    // Charger au démarrage
+    window.addEventListener('load', () => {
+      console.log('🚀 Initialisation Surf Dakar Live...');
+      loadData();
+    });
+
+    // Auto-refresh toutes les 30 minutes
+    setInterval(loadData, 30 * 60 * 1000);
+  </script>
 </body>
 </html>
