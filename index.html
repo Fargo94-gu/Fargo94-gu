@@ -7,12 +7,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            /* Utilisation d'une image de fond locale et fiable */
-            background: url('./image_e5b389.jpg') no-repeat center center fixed;
+            /* Image de fond fixe d'un surfer */
+            background: 
+                /* Image principale du surfer en premier plan */
+                url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80&auto=format&fit=crop') no-repeat center center fixed,
+                /* Image de fond secondaire (plage/océan) */
+                url('https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1920&q=80&auto=format&fit=crop') no-repeat center center fixed;
             background-size: cover;
             background-attachment: fixed;
+            background-position: center;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto;
             color: #075985;
+            min-height: 100vh;
+        }
+
+        /* Overlay sombre pour améliorer la lisibilité du texte */
+        .content-overlay {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(7, 89, 133, 0.3) 100%);
+            min-height: 100vh;
         }
 
         .card {
@@ -49,9 +61,9 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* Style pour la phrase d'approche */
+        /* Style pour la phrase d'approche - CENTRE */
         .surf-tagline {
-            background-color: rgba(7, 89, 133, 0.7);
+            background-color: rgba(7, 89, 133, 0.8);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             color: white;
@@ -60,76 +72,93 @@
             text-align: center;
             font-size: 0.95rem;
             font-weight: 500;
-            margin-bottom: 1rem;
+            margin: 1rem auto 1rem auto; /* CENTRE horizontalement */
             max-width: 90%;
+            width: fit-content; /* S'adapte au contenu */
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Style pour les titres des sections - Position rapprochée */
+        /* Style pour les titres des sections - CENTRE parfaitement */
         .section-title {
-            background-color: rgba(7, 89, 133, 0.7);
+            background-color: rgba(7, 89, 133, 0.8);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             color: white;
-            padding: 0.5rem 1.25rem;
-            border-radius: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.75rem;
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 0.875rem;
             font-weight: bold;
-            margin-bottom: 0.25rem;
-            max-width: 90%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin: 0.5rem auto 0.25rem auto; /* CENTRE horizontalement */
+            max-width: fit-content;
+            width: fit-content; /* S'adapte au contenu */
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        /* Styles pour le conteneur Météo */
+        /* Styles pour le conteneur Météo - CENTRE */
         .all-weather-container {
             position: relative;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             overflow: hidden;
-            padding: 1rem;
+            padding: 0.75rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1rem;
-            width: 100%;
-            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
-            background-size: cover;
-            margin-top: 2rem;
-        }
-
-        /* Styles pour le conteneur Marées */
-        .all-tides-container {
-            position: relative;
-            border-radius: 1rem;
-            overflow: hidden;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center; /* CENTRE verticalement aussi */
             gap: 0.75rem;
             width: 100%;
-            margin: 0.5rem 0;
+            max-width: 100%; /* Limite la largeur */
+            margin: 0.5rem auto 0.5rem auto; /* CENTRE horizontalement */
             background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
             background-size: cover;
-            max-width: 3xl;
         }
 
-        /* Styles pour le conteneur Spots de Surf */
-        .all-spots-container {
+        /* Styles pour le conteneur Marées - CENTRE */
+        .all-tides-container {
             position: relative;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             overflow: hidden;
-            padding: 1.5rem;
+            padding: 0.75rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
+            justify-content: center; /* CENTRE verticalement */
+            gap: 0.5rem;
             width: 100%;
-            margin-top: 0.5rem;
+            max-width: 100%;
+            margin: 0.25rem auto; /* CENTRE horizontalement */
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
+            background-size: cover;
+        }
+
+        /* Styles pour le conteneur Spots de Surf - CENTRE */
+        .all-spots-container {
+            position: relative;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* CENTRE verticalement */
+            gap: 1rem;
+            width: 100%;
+            max-width: 100%;
+            margin: 0.25rem auto 2rem auto; /* CENTRE horizontalement + espace avant bouton */
             background: url('https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center;
             background-size: cover;
+        }
+
+        /* Bouton refresh - CENTRE */
+        #refreshBtn {
+            display: block;
+            margin: 0 auto; /* CENTRE horizontalement */
+            width: fit-content;
         }
 
         /* Overlay pour les trois conteneurs */
@@ -152,92 +181,102 @@
             z-index: 1;
         }
 
-        /* Style des cartes météo */
+        /* Style des cartes météo - CENTRE */
         .weather-card {
             background-color: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.1), 0 3px 4px -1px rgba(0, 0, 0, 0.05);
+            padding: 0.75rem;
+            margin: 0 auto 0.5rem auto; /* CENTRE horizontalement */
+            width: fit-content; /* S'adapte au contenu */
+            text-align: center;
         }
 
-        /* Style pour les cartes de marées - Réduit */
+        /* Style pour les cartes de marées - CENTRE */
         .tide-card {
             background-color: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.1), 0 3px 4px -1px rgba(0, 0, 0, 0.05);
+            padding: 0.75rem;
             text-align: center;
             width: 100%;
+            max-width: fit-content; /* S'adapte au contenu */
+            margin: 0 auto; /* CENTRE horizontalement */
         }
 
-        /* Style pour les informations de marée - Compact */
+        /* Style pour les informations de marée - CENTRE */
         .tide-info {
             display: flex;
-            justify-content: space-around;
+            justify-content: center; /* CENTRE horizontalement */
             align-items: center;
             width: 100%;
-            margin: 0.5rem 0;
+            margin: 0.25rem 0;
+            gap: 1rem; /* Espacement entre les items */
         }
 
         .tide-item {
             text-align: center;
-            padding: 0.75rem;
+            padding: 0.5rem;
             background: rgba(255, 255, 255, 0.3);
-            border-radius: 0.5rem;
-            min-width: 100px;
+            border-radius: 0.375rem;
+            min-width: 80px;
+            flex-shrink: 0; /* Empêche le rétrécissement */
         }
 
         .tide-type {
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: #075985;
-            margin-bottom: 0.125rem;
+            margin-bottom: 0.1rem;
         }
 
         .tide-time {
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: bold;
             color: #1e40af;
-            margin-bottom: 0.125rem;
+            margin-bottom: 0.1rem;
         }
 
         .tide-height {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: #1e293b;
         }
 
         .tide-direction {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: #64748b;
-            margin-top: 0.125rem;
+            margin-top: 0.1rem;
         }
 
-        /* Style pour le conteneur spots */
+        /* Style pour le conteneur spots - CENTRE */
         .spot-card {
             background-color: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.1), 0 3px 4px -1px rgba(0, 0, 0, 0.05);
+            padding: 0.75rem;
             text-align: center;
-            min-height: 220px;
+            min-height: 180px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin: 0 auto; /* CENTRE horizontalement */
+            width: 100%;
+            max-width: 350px; /* Limite la largeur des cartes */
         }
 
         .spot-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 16px 20px -4px rgba(0, 0, 0, 0.1), 0 8px 8px -4px rgba(0, 0, 0, 0.04);
         }
 
         .wave-rating {
             font-weight: bold;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
         }
 
         .rating-excellent { color: #10b981; }
@@ -249,32 +288,74 @@
         .difficulty-intermediate { color: #f97316; font-weight: bold; }
         .difficulty-expert { color: #ef4444; font-weight: bold; }
 
-        /* Style pour le loading et erreurs */
+        /* Style pour le loading et erreurs - CENTRE */
         .loading {
             text-align: center;
             color: white;
-            font-size: 1rem;
-            padding: 2rem;
+            font-size: 0.875rem;
+            padding: 1rem;
+            margin: 0 auto; /* CENTRE horizontalement */
+            width: fit-content;
         }
 
         .error {
             text-align: center;
             color: #f87171;
-            font-size: 0.875rem;
-            padding: 1rem;
+            font-size: 0.75rem;
+            padding: 0.75rem;
             background: rgba(248, 113, 113, 0.1);
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
             border: 1px solid rgba(248, 113, 113, 0.3);
+            margin: 0 auto; /* CENTRE horizontalement */
+            width: fit-content;
         }
 
         .success {
             text-align: center;
             color: #10b981;
-            font-size: 0.875rem;
-            padding: 0.5rem;
+            font-size: 0.75rem;
+            padding: 0.375rem;
             background: rgba(16, 185, 129, 0.1);
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
             border: 1px solid rgba(16, 185, 129, 0.3);
+            margin: 0 auto; /* CENTRE horizontalement */
+            width: fit-content;
+        }
+
+        /* Responsive pour mobile */
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll; /* Pour les mobiles qui ne supportent pas fixed */
+                background-size: cover;
+            }
+            
+            .surf-tagline, .section-title {
+                font-size: 0.8rem;
+                padding: 0.375rem 0.75rem;
+                max-width: 95%;
+            }
+            
+            .weather-card, .spot-card {
+                padding: 0.5rem;
+                max-width: 100%;
+            }
+            
+            .tide-item {
+                min-width: 70px;
+                padding: 0.375rem;
+            }
+            
+            .tide-info {
+                gap: 0.75rem;
+            }
+            
+            /* Grid responsive pour spots sur mobile */
+            .grid {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -284,39 +365,39 @@
         <img src="https://i.ibb.co/0mQ5j5j/malika-surf-camp.png" alt="Malika Surf Camp" class="logo">
     </div>
 
-    <div class="surf-tagline">
-        "Votre check quotidien : météo précise et vagues live pour choper les meilleurs spots de Dakar !"
-    </div>
-
-    <h1 class="text-2xl font-bold mb-4 text-white text-shadow-lg">Surf Spots - Dakar (live)</h1>
-
-    <div class="section-title">🌤️ Météo</div>
-
-    <div class="all-weather-container mb-2 shadow-xl">
-        <div id="weather-content">
-            <div class="loading">🔄 Chargement des données météo en temps réel...</div>
+    <div class="content-overlay">
+        <div class="surf-tagline">
+            "Votre check quotidien : météo précise et vagues live pour choper les meilleurs spots de Dakar !"
         </div>
-    </div>
 
-    <div class="section-title">🌊 Marées à Dakar</div>
+        <div class="section-title">🌤️ Météo</div>
 
-    <div class="all-tides-container shadow-xl">
-        <div id="tides-content">
-            <div class="loading">🔄 Calcul des marées...</div>
+        <div class="all-weather-container shadow-xl">
+            <div id="weather-content">
+                <div class="loading">🔄 Chargement des données météo en temps réel...</div>
+            </div>
         </div>
-    </div>
 
-    <div class="section-title">🌊 Spots de Surf</div>
+        <div class="section-title">🌊 Marées à Dakar</div>
 
-    <div class="all-spots-container shadow-xl">
-        <div id="spots-content">
-            <div class="loading">🔄 Calcul des conditions de vagues...</div>
+        <div class="all-tides-container shadow-xl">
+            <div id="tides-content">
+                <div class="loading">🔄 Calcul des marées...</div>
+            </div>
         </div>
-    </div>
 
-    <button id="refreshBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" onclick="loadData()">
-        🔄 Actualiser tout
-    </button>
+        <div class="section-title">🌊 Spots de Surf</div>
+
+        <div class="all-spots-container shadow-xl">
+            <div id="spots-content">
+                <div class="loading">🔄 Calcul des conditions de vagues...</div>
+            </div>
+        </div>
+
+        <button id="refreshBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+            🔄 Actualiser tout
+        </button>
+    </div>
 
     <script>
         // Fonction pour mapper les codes météo Open-Meteo vers emojis
@@ -444,40 +525,40 @@
                 ];
 
                 weatherContent.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full" style="justify-items: center;">
                         <div class="weather-card flex flex-col items-center justify-center">
-                            <h3 class="text-lg font-bold mb-2">Maintenant</h3>
-                            <div class="flex items-center space-x-3">
-                                <span class="text-3xl">${todayEmoji}</span>
+                            <h3 class="text-base font-bold mb-1">Maintenant</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-2xl">${todayEmoji}</span>
                                 <div>
-                                    <p class="text-2xl font-bold">${Math.round(current.temperature_2m)}°C</p>
-                                    <p class="text-sm">Ressenti : ${Math.round(current.temperature_2m)}°C</p>
+                                    <p class="text-xl font-bold">${Math.round(current.temperature_2m)}°C</p>
+                                    <p class="text-xs">Ressenti : ${Math.round(current.temperature_2m)}°C</p>
                                 </div>
                             </div>
-                            <div class="mt-3 text-xs text-center">
+                            <div class="mt-2 text-xs text-center">
                                 <p>Humidité : ${current.relative_humidity_2m}%</p>
                                 <p>Vent : ${Math.round(current.wind_speed_10m * 3.6)} km/h (${windDir})</p>
                             </div>
                         </div>
 
                         <div class="weather-card flex flex-col items-center justify-center">
-                            <h3 class="text-lg font-bold mb-2">Aujourd'hui</h3>
-                            <div class="flex items-center space-x-3">
-                                <span class="text-3xl">${todayEmoji}</span>
+                            <h3 class="text-base font-bold mb-1">Aujourd'hui</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-2xl">${todayEmoji}</span>
                                 <div>
-                                    <p class="text-2xl font-bold">${Math.round(daily.temperature_2m_max[0])}°C</p>
-                                    <p class="text-sm">Max de la journée</p>
+                                    <p class="text-xl font-bold">${Math.round(daily.temperature_2m_max[0])}°C</p>
+                                    <p class="text-xs">Max de la journée</p>
                                 </div>
                             </div>
-                            <div class="mt-3 text-xs text-center">
+                            <div class="mt-2 text-xs text-center">
                                 <p>Min : ${Math.round(daily.temperature_2m_min[0])}°C</p>
                                 <p>Moyenne : ${Math.round((daily.temperature_2m_max[0] + daily.temperature_2m_min[0]) / 2)}°C</p>
                             </div>
                         </div>
 
-                        <div class="weather-card md:col-span-2 lg:col-span-1">
-                            <h3 class="text-sm font-bold mb-2">Prochaines 6h</h3>
-                            <div class="flex overflow-x-auto space-x-3 pb-2">
+                        <div class="weather-card md:col-span-2 lg:col-span-1 flex flex-col items-center">
+                            <h3 class="text-xs font-bold mb-1">Prochaines 6h</h3>
+                            <div class="flex overflow-x-auto space-x-2 pb-1 justify-center">
                                 ${Array.from({length: 6}, (_, i) => {
                                     const hourIndex = (currentHour + i + 1) % 24;
                                     const time = new Date(now);
@@ -485,16 +566,16 @@
                                     const hourStr = time.getHours().toString().padStart(2, '0') + ':00';
                                     const temp = Math.round(hourly.temperature_2m[hourIndex]);
                                     const code = hourly.weather_code[hourIndex];
-                                    return `<div class="text-center flex-shrink-0 min-w-[60px]">
+                                    return `<div class="text-center flex-shrink-0 min-w-[50px]">
                                         <p class="text-xs">${hourStr}</p>
-                                        <span class="text-lg block">${getWeatherEmoji(code)}</span>
+                                        <span class="text-base block">${getWeatherEmoji(code)}</span>
                                         <p class="text-xs">${temp}°C</p>
                                     </div>`;
                                 }).join('')}
                             </div>
                         </div>
                     </div>
-                    <div class="success mt-2">✅ Météo mise à jour - ${new Date().toLocaleString('fr-FR')}</div>
+                    <div class="success mt-1">✅ Météo mise à jour - ${new Date().toLocaleString('fr-FR')}</div>
                 `;
 
                 // Stocker pour marées et spots
@@ -506,7 +587,7 @@
                 document.getElementById('weather-content').innerHTML = `
                     <div class="error">
                         <p>❌ Erreur de connexion météo</p>
-                        <p class="text-sm mt-2">Utilisation données de fallback</p>
+                        <p class="text-xs mt-1">Utilisation données de fallback</p>
                     </div>
                 `;
                 // Fallback data
@@ -527,7 +608,7 @@
                 const tidesContent = document.getElementById('tides-content');
                 tidesContent.innerHTML = `
                     <div class="flex flex-col items-center justify-center">
-                        <div class="text-3xl mb-2">🌊</div>
+                        <div class="text-2xl mb-1">🌊</div>
 
                         <div class="tide-info">
                             <div class="tide-item">
@@ -545,12 +626,12 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 text-xs text-gray-700">
+                        <div class="mt-2 text-xs text-center text-gray-700">
                             <p><strong>Prochaine :</strong> ${tides.next}</p>
                             <p class="text-gray-600">Niveau actuel : ${tides.currentLevel} m</p>
                         </div>
                     </div>
-                    <div class="success mt-2">✅ Marées calculées localement</div>
+                    <div class="success mt-1">✅ Marées calculées localement</div>
                 `;
 
             } catch (error) {
@@ -558,7 +639,7 @@
                 document.getElementById('tides-content').innerHTML = `
                     <div class="loading">
                         <p>❌ Erreur calcul marées</p>
-                        <p class="text-sm mt-2">Données de base utilisées</p>
+                        <p class="text-xs mt-1">Données de base utilisées</p>
                     </div>
                 `;
             }
@@ -575,7 +656,7 @@
                 const windDir = current.wind_direction_10m;
 
                 const spotsContent = document.getElementById('spots-content');
-                let spotsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">';
+                let spotsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 w-full" style="justify-items: center;">';
 
                 spotsData.forEach(spot => {
                     const conditions = calculateSpotConditions(windSpeed, windDir, spot);
@@ -592,23 +673,23 @@
 
                     spotsHtml += `
                         <div class="spot-card">
-                            <h2 class="text-lg font-bold mb-1">${spot.name}</h2>
-                            <p class="text-sm ${difficultyClass} mb-2">${difficultyEmoji} ${difficultyText}</p>
-                            <div class="text-xs text-gray-800 mb-3">${spot.description}</div>
-                            <div class="flex flex-col items-center mt-2">
-                                <span class="text-4xl">🌊</span>
-                                <div class="text-sm mt-1">Hauteur : ${conditions.height} m</div>
-                                <div class="text-sm">Période : ${conditions.period} s</div>
+                            <h2 class="text-base font-bold mb-1">${spot.name}</h2>
+                            <p class="text-xs ${difficultyClass} mb-1">${difficultyEmoji} ${difficultyText}</p>
+                            <div class="text-xs text-gray-800 mb-2">${spot.description}</div>
+                            <div class="flex flex-col items-center mt-1">
+                                <span class="text-3xl">🌊</span>
+                                <div class="text-xs mt-1">Hauteur : ${conditions.height} m</div>
+                                <div class="text-xs">Période : ${conditions.period} s</div>
                             </div>
-                            <div class="mt-3 text-sm text-gray-700">
+                            <div class="mt-2 text-xs text-gray-700">
                                 Vent : ${conditions.windSpeed} km/h (${conditions.windRelative})
                             </div>
-                            <div class="mt-2 flex justify-center" style="transform: rotate(${windDir}deg);">
+                            <div class="mt-1 flex justify-center" style="transform: rotate(${windDir}deg);">
                                 <svg class="arrow" viewBox="0 0 24 24">
                                     <path d="M12 2 L15 8 H13 V22 H11 V8 H9 L12 2 Z" fill="#075985"></path>
                                 </svg>
                             </div>
-                            <div class="mt-3 text-xs">
+                            <div class="mt-2 text-xs">
                                 <span class="wave-rating ${conditions.ratingClass}">${conditions.ratingText}</span>
                                 <div class="text-gray-500">Score : ${conditions.score}/100</div>
                             </div>
@@ -620,7 +701,7 @@
                 spotsContent.innerHTML = spotsHtml;
 
                 const successDiv = document.createElement('div');
-                successDiv.className = 'success mt-2 w-full text-center';
+                successDiv.className = 'success mt-1';
                 successDiv.textContent = '✅ Conditions de vagues calculées';
                 spotsContent.appendChild(successDiv);
 
@@ -629,7 +710,7 @@
                 document.getElementById('spots-content').innerHTML = `
                     <div class="loading">
                         <p>❌ Erreur calcul spots</p>
-                        <p class="text-sm mt-2">Conditions de base utilisées</p>
+                        <p class="text-xs mt-1">Conditions de base utilisées</p>
                     </div>
                 `;
             }
