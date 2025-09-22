@@ -246,7 +246,7 @@
         }
         
         .spot-icon {
-            font-size: 1.25rem; /* Réduit de 1.5rem à 1.25rem */
+            font-size: 1.25rem;
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
@@ -302,7 +302,7 @@
         }
         
         .wave-icon {
-            font-size: 1.75rem; /* Réduit de 2.25rem */
+            font-size: 1.75rem;
             animation: wavePulse 2s ease-in-out infinite;
         }
         
@@ -312,7 +312,7 @@
         }
         
         .wave-height {
-            font-size: 1.5rem; /* Réduit de 2rem */
+            font-size: 1.5rem;
             font-weight: 800;
             color: white;
             margin: 0;
@@ -362,14 +362,14 @@
             letter-spacing: 0.05em;
         }
         
-        /* Wind Rose Compact - MODIFIÉE AVEC ÉTOILE BLEUE */
+        /* Wind Rose Compact */
         .wind-rose {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0.75rem 0;
-            height: 50px; /* Réduit de 60px */
+            height: 50px;
             width: 50px;
         }
         
@@ -402,20 +402,20 @@
         }
         
         .wind-arrow {
-            font-size: 1.25rem; /* Réduit de 1.75rem */
+            font-size: 1.25rem;
             color: #60a5fa;
             z-index: 3;
             transition: transform 0.3s ease;
         }
         
-        /* ÉTOILE BLEUE RÉDUITE - NOUVELLE FONCTIONNALITÉ */
+        /* Étoile Bleue Réduite */
         .wind-star {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #3b82f6; /* Bleu surf */
-            font-size: 8px; /* TAILLE RÉDUITE */
+            color: #3b82f6;
+            font-size: 8px;
             z-index: 2;
             opacity: 0.8;
             transition: transform 0.3s ease;
@@ -427,7 +427,6 @@
             display: block;
         }
         
-        /* Animation de rotation de l'étoile */
         .wind-star.animate {
             animation: starRotate 2s linear infinite;
         }
@@ -466,8 +465,8 @@
         }
         
         .progress-bar {
-            width: 120px; /* Réduit de 160px */
-            height: 6px; /* Réduit de 8px */
+            width: 120px;
+            height: 6px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
             overflow: hidden;
@@ -563,11 +562,101 @@
             to { transform: translateY(0); opacity: 1; }
         }
         
-        /* Theme Toggle Mobile */
+        /* LOGO PERSONNALISÉ FG - EN HAUT À GAUCHE */
+        .logo-container {
+            position: fixed;
+            top: 1rem;
+            left: 1rem; /* MODIFIÉ : À GAUCHE */
+            z-index: 100;
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo-container:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .logo {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-initials {
+            font-size: 16px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 2;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            color: #075985; /* Couleur principale pour FG */
+        }
+        
+        .logo-circle {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            top: 2px;
+            left: 2px;
+            z-index: 1;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+        
+        .logo-wave {
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 8px;
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            z-index: 0;
+            animation: waveFloat 2s ease-in-out infinite;
+        }
+        
+        @keyframes logoPulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes waveFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-2px); }
+        }
+        
+        /* Theme Toggle - MAINTENANT EN HAUT À DROITE */
         .theme-toggle {
             position: fixed;
             top: 1rem;
-            right: 1rem;
+            right: 1rem; /* REMIS À DROITE */
             z-index: 100;
             background: var(--glass);
             border: none;
@@ -580,6 +669,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             color: white;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .theme-toggle:hover {
@@ -597,6 +688,25 @@
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
                 gap: 0.75rem;
+            }
+            
+            .logo-container {
+                width: 56px;
+                height: 56px;
+            }
+            
+            .logo {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .logo-initials {
+                font-size: 20px;
+            }
+            
+            .theme-toggle {
+                width: 48px;
+                height: 48px;
             }
         }
         
@@ -622,7 +732,16 @@
 </head>
 <body data-theme="light">
     
-    <!-- Theme Toggle -->
+    <!-- LOGO PERSONNALISÉ FG - EN HAUT À GAUCHE -->
+    <div class="logo-container" title="Surf Spots Dakar - FG">
+        <div class="logo">
+            <div class="logo-circle"></div>
+            <div class="logo-wave"></div>
+            <span class="logo-initials">FG</span>
+        </div>
+    </div>
+    
+    <!-- THEME TOGGLE - EN HAUT À DROITE -->
     <button class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">
         <span id="themeIcon">🌙</span>
     </button>
@@ -787,7 +906,7 @@
             };
         }
         
-        // Spot Conditions (Local + Realistic) - MODIFIÉE
+        // Spot Conditions (Local + Realistic)
         function generateSpotConditions(spot, dayOffset = 0) {
             const now = new Date();
             const hour = now.getHours() + dayOffset * 24;
@@ -935,7 +1054,7 @@
             `;
         }
         
-        // Load Spots - MODIFIÉE AVEC L'ÉTOILE BLEUE
+        // Load Spots
         async function loadSpots() {
             const spotsContent = document.getElementById('spotsContent');
             spotsContent.innerHTML = '<div class="loading col-span-full"><div class="spinner"></div><p>Analyse conditions...</p></div>';
@@ -1061,7 +1180,7 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🌊 Surf Dakar App Initialisée');
+            console.log('🌊 Surf Dakar App Initialisée - Logo FG');
             startAutoRefresh();
         });
         
