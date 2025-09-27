@@ -375,13 +375,19 @@
             letter-spacing: 0.05em;
         }
         
-        /* Wind Rose Compact */
+        /* Wind Rose Compact avec détails */
+        .wind-rose-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+        }
+        
         .wind-rose {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0.75rem 0;
             height: 50px;
             width: 50px;
         }
@@ -447,6 +453,22 @@
         @keyframes starRotate {
             0% { transform: translate(-50%, -50%) rotate(0deg); }
             100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        /* Détails du vent */
+        .wind-details {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 100px;
+        }
+        
+        .wind-details p {
+            margin: 0;
+            line-height: 1.2;
+            font-weight: 500;
         }
         
         /* Rating Mobile */
@@ -1129,10 +1151,18 @@
                                 <span class="weather-label">${conditions.windRelative}</span>
                             </div>
                         </div>
-                        <div class="wind-rose">
-                            <span class="wind-compass">N</span>
-                            <span class="wind-arrow" style="transform: rotate(${conditions.waveDirection - 90}deg)">➡️</span>
-                            <span class="wind-star animate"></span>
+                        <div class="wind-rose-container">
+                            <div class="wind-rose">
+                                <span class="wind-compass">N</span>
+                                <span class="wind-arrow" style="transform: rotate(${conditions.waveDirection - 90}deg)">➡️</span>
+                                <span class="wind-star animate"></span>
+                            </div>
+                            <div class="wind-details">
+                                <p>🌊 ${conditions.height}m</p>
+                                <p>⏱ ${conditions.period}s</p>
+                                <p>💨 ${conditions.windSpeed} km/h</p>
+                                <p>📍 ${conditions.windRelative}</p>
+                            </div>
                         </div>
                         <div class="rating-section">
                             <p class="rating-title rating-${conditions.rating}">Note: ${conditions.ratingText}</p>
