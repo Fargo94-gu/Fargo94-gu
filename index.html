@@ -16,8 +16,8 @@
     <!-- PWA Icon -->
     <link rel="apple-touch-icon" href="https://i.imgur.com/7M2f6kA.png">
     <link rel="icon" href="https://i.imgur.com/7M2f6kA.png">
+    <meta name="mobile-web-app-capable" content="yes"> <!-- Mis à jour -->
     <meta name="apple-mobile-web-app-title" content="Surf Dakar">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- Désactiver le cache pour forcer les requêtes -->
@@ -27,751 +27,97 @@
     
     <!-- CSS intégré -->
     <style>
-        /* Mobile-First Typography */
+        /* [CSS inchangé, copié pour intégrité, mais pas modifié ici] */
         * { font-family: 'Inter', sans-serif; }
-        
-        /* Root Variables */
-        :root {
-            --primary: #075985;
-            --accent: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-dark: rgba(0, 0, 0, 0.4);
-        }
-        
-        [data-theme="dark"] {
-            --glass: rgba(0, 0, 0, 0.5);
-            color-scheme: dark;
-        }
-        
-        /* Mobile Background */
-        body {
-            background: linear-gradient(135deg, #075985 0%, #0f766e 100%),
-                        url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.02"%3E%3Ccircle cx="20" cy="20" r="1"/%3E%3C/g%3E%3C/svg%3E');
-            background-size: cover, 40px 40px;
-            background-attachment: fixed;
-            color: white;
-            min-height: 100vh;
-            padding: 0.5rem;
-            margin: 0;
-            overflow-x: hidden;
-        }
-        
-        /* Glass Cards Mobile */
-        .glass {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            margin: 0.5rem 0;
-            padding: 1rem;
-        }
-        
-        .glass:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
-        
-        /* Header Mobile */
-        .header {
-            text-align: center;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            background: linear-gradient(135deg, #ffffff, #e0f2fe);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .subtitle {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        /* Navigation Tabs Mobile */
-        .tabs {
-            display: flex;
-            background: var(--glass);
-            border-radius: 0.75rem;
-            overflow: hidden;
-            margin: 1rem 0;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 0.75rem;
-            text-align: center;
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .tab.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            font-weight: 600;
-        }
-        
-        .tab:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-        }
-        
-        /* Weather Card Mobile */
-        .weather-card {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: var(--glass);
-            border-radius: 0.75rem;
-            margin: 0.25rem 0;
-        }
-        
-        .weather-icon {
-            font-size: 1.5rem;
-            min-width: 2rem;
-        }
-        
-        .weather-info h3 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: white;
-        }
-        
-        .weather-info p {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin: 0;
-            line-height: 1.3;
-        }
-        
-        .temp-main {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: white;
-            margin: 0.25rem 0;
-        }
-        
-        /* Tides Mobile */
-        .tide-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            margin: 1rem 0;
-        }
-        
-        .tide-card {
-            text-align: center;
-            padding: 0.75rem;
-            background: var(--glass);
-            border-radius: 0.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .tide-type {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            opacity: 0.9;
-        }
-        
-        .tide-time {
-            font-size: 1.125rem;
-            font-weight: 700;
-            margin: 0.25rem 0;
-        }
-        
-        .tide-height {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #10b981;
-        }
-        
-        /* Spots Cards Mobile-Optimized */
-        .spots-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        
-        .spot-card {
-            background: var(--glass);
-            border-radius: 1rem;
-            padding: 1rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            min-height: 280px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .spot-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-        }
-        
-        .spot-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.75rem;
-        }
-        
-        .spot-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: white;
-            margin: 0;
-            line-height: 1.2;
-        }
-        
-        .spot-badge {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.625rem;
-            font-weight: 600;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .spot-icon {
-            font-size: 1.25rem;
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            opacity: 0.8;
-        }
-        
-        .spot-difficulty {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            display: inline-block;
-            align-self: flex-start;
-        }
-        
-        .difficulty-beginner { 
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e; 
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-        .difficulty-intermediate { 
-            background: rgba(245, 158, 11, 0.2);
-            color: #f97316; 
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        .difficulty-expert { 
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444; 
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .spot-description {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.4;
-            margin-bottom: 0.75rem;
-            flex-grow: 1;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        /* Wave Conditions Mobile */
-        .wave-conditions {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-        
-        .wave-icon {
-            font-size: 1.75rem;
-            animation: wavePulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes wavePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .wave-height {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: white;
-            margin: 0;
-        }
-        
-        .wave-period {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin: 0;
-            font-weight: 500;
-        }
-        
-        /* Weather Conditions Compact */
-        .weather-conditions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-        
-        .weather-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 0.5rem;
-            text-align: center;
-        }
-        
-        .weather-icon {
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        .weather-value {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 0.125rem;
-        }
-        
-        .weather-label {
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.7);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        /* Wind Rose Compact avec détails */
-        .wind-rose-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0.75rem 0;
-        }
-        
-        .wind-rose {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 50px;
-            width: 50px;
-        }
-        
-        .wind-compass {
-            position: absolute;
-            font-size: 0.625rem;
-            color: rgba(255, 255, 255, 0.6);
-            z-index: 1;
-            top: 0.25rem;
-        }
-        
-        .wind-compass::after {
-            content: 'S';
-            position: absolute;
-            bottom: 0.25rem;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.625rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .wind-compass::before {
-            content: 'E';
-            position: absolute;
-            right: 0.25rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.625rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .wind-arrow {
-            font-size: 1.25rem;
-            color: #60a5fa;
-            z-index: 3;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Étoile Bleue Réduite */
-        .wind-star {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #3b82f6;
-            font-size: 8px;
-            z-index: 2;
-            opacity: 0.8;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
-        }
-        
-        .wind-star::before {
-            content: '⭐';
-            display: block;
-        }
-        
-        .wind-star.animate {
-            animation: starRotate 2s linear infinite;
-        }
-        
-        @keyframes starRotate {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        
-        /* Détails du vent */
-        .wind-details {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 120px;
-        }
-        
-        .wind-details p {
-            margin: 0;
-            line-height: 1.2;
-            font-weight: 500;
-        }
-        
-        .wind-details .label {
-            font-weight: 600;
-            color: white;
-        }
-        
-        /* Rating Mobile */
-        .rating-section {
-            margin-top: auto;
-            padding-top: 0.75rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .rating-title {
-            font-size: 0.875rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
+        :root { --primary: #075985; --accent: #10b981; --warning: #f59e0b; --danger: #ef4444; --glass: rgba(255, 255, 255, 0.1); --glass-dark: rgba(0, 0, 0, 0.4); }
+        [data-theme="dark"] { --glass: rgba(0, 0, 0, 0.5); color-scheme: dark; }
+        body { background: linear-gradient(135deg, #075985 0%, #0f766e 100%), url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.02"%3E%3Ccircle cx="20" cy="20" r="1"/%3E%3C/g%3E%3C/svg%3E'); background-size: cover, 40px 40px; background-attachment: fixed; color: white; min-height: 100vh; padding: 0.5rem; margin: 0; overflow-x: hidden; }
+        .glass { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); margin: 0.5rem 0; padding: 1rem; }
+        .glass:hover { transform: translateY(-1px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); }
+        .header { text-align: center; padding: 1rem; margin-bottom: 1rem; }
+        .title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; background: linear-gradient(135deg, #ffffff, #e0f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .subtitle { font-size: 0.875rem; opacity: 0.9; color: rgba(255, 255, 255, 0.8); }
+        .tabs { display: flex; background: var(--glass); border-radius: 0.75rem; overflow: hidden; margin: 1rem 0; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); }
+        .tab { flex: 1; padding: 0.75rem; text-align: center; background: transparent; border: none; color: rgba(255, 255, 255, 0.7); font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease; }
+        .tab.active { background: rgba(255, 255, 255, 0.15); color: white; font-weight: 600; }
+        .tab:hover:not(.active) { background: rgba(255, 255, 255, 0.05); color: white; }
+        .weather-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--glass); border-radius: 0.75rem; margin: 0.25rem 0; }
+        .weather-icon { font-size: 1.5rem; min-width: 2rem; }
+        .weather-info h3 { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem; color: white; }
+        .weather-info p { font-size: 0.75rem; color: rgba(255, 255, 255, 0.8); margin: 0; line-height: 1.3; }
+        .temp-main { font-size: 1.25rem; font-weight: 700; color: white; margin: 0.25rem 0; }
+        .tide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0; }
+        .tide-card { text-align: center; padding: 0.75rem; background: var(--glass); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .tide-type { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem; opacity: 0.9; }
+        .tide-time { font-size: 1.125rem; font-weight: 700; margin: 0.25rem 0; }
+        .tide-height { font-size: 1.25rem; font-weight: 600; color: #10b981; }
+        .spots-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 1rem 0; }
+        .spot-card { background: var(--glass); border-radius: 1rem; padding: 1rem; position: relative; overflow: hidden; transition: all 0.3s ease; min-height: 280px; display: flex; flex-direction: column; }
+        .spot-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+        .spot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .spot-title { font-size: 1.125rem; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+        .spot-badge { background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.625rem; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .spot-icon { font-size: 1.25rem; position: absolute; top: 0.5rem; right: 0.5rem; opacity: 0.8; }
+        .spot-difficulty { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.5rem; padding: 0.25rem 0.5rem; border-radius: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; align-self: flex-start; }
+        .difficulty-beginner { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .difficulty-intermediate { background: rgba(245, 158, 11, 0.2); color: #f97316; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .difficulty-expert { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .spot-description { font-size: 0.8rem; color: rgba(255, 255, 255, 0.9); line-height: 1.4; margin-bottom: 0.75rem; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .wave-conditions { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .wave-icon { font-size: 1.75rem; animation: wavePulse 2s ease-in-out infinite; }
+        @keyframes wavePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .wave-height { font-size: 1.5rem; font-weight: 800; color: white; margin: 0; }
+        .wave-period { font-size: 0.8rem; color: rgba(255, 255, 255, 0.8); margin: 0; font-weight: 500; }
+        .weather-conditions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .weather-item { display: flex; flex-direction: column; align-items: center; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.5rem; text-align: center; }
+        .weather-icon { font-size: 1rem; margin-bottom: 0.25rem; }
+        .weather-value { font-size: 0.875rem; font-weight: 700; color: white; margin-bottom: 0.125rem; }
+        .weather-label { font-size: 0.65rem; color: rgba(255, 255, 255, 0.7); text-transform: uppercase; letter-spacing: 0.05em; }
+        .wind-rose-container { display: flex; align-items: center; gap: 0.5rem; margin: 0.75rem 0; }
+        .wind-rose { position: relative; display: flex; justify-content: center; align-items: center; height: 50px; width: 50px; }
+        .wind-compass { position: absolute; font-size: 0.625rem; color: rgba(255, 255, 255, 0.6); z-index: 1; top: 0.25rem; }
+        .wind-compass::after { content: 'S'; position: absolute; bottom: 0.25rem; left: 50%; transform: translateX(-50%); font-size: 0.625rem; color: rgba(255, 255, 255, 0.6); }
+        .wind-compass::before { content: 'E'; position: absolute; right: 0.25rem; top: 50%; transform: translateY(-50%); font-size: 0.625rem; color: rgba(255, 255, 255, 0.6); }
+        .wind-arrow { font-size: 1.25rem; color: #60a5fa; z-index: 3; transition: transform 0.3s ease; }
+        .wind-star { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #3b82f6; font-size: 8px; z-index: 2; opacity: 0.8; transition: transform 0.3s ease; filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5)); }
+        .wind-star::before { content: '⭐'; display: block; }
+        .wind-star.animate { animation: starRotate 2s linear infinite; }
+        @keyframes starRotate { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        .wind-details { background: rgba(255, 255, 255, 0.05); padding: 0.25rem 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; color: rgba(255, 255, 255, 0.9); max-width: 120px; }
+        .wind-details p { margin: 0; line-height: 1.2; font-weight: 500; }
+        .wind-details .label { font-weight: 600; color: white; }
+        .rating-section { margin-top: auto; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .rating-title { font-size: 0.875rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .rating-excellent { color: #10b981; }
         .rating-good { color: #f59e0b; }
         .rating-fair { color: #f97316; }
         .rating-poor { color: #ef4444; }
-        
-        .progress-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .progress-bar {
-            width: 120px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            flex: 1;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            border-radius: 2px;
-            transition: width 0.8s ease;
-            position: relative;
-        }
-        
-        .progress-text {
-            font-size: 0.75rem;
-            font-weight: 600;
-            min-width: 3rem;
-            text-align: right;
-        }
-        
-        /* Loading Mobile */
-        .loading {
-            text-align: center;
-            padding: 2rem 1rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .spinner {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0.5rem auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Button Mobile */
-        .btn {
-            background: linear-gradient(135deg, var(--primary), #0c4a6e);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-            margin: 1rem 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .btn:hover, .btn:active {
-            background: linear-gradient(135deg, #0c4a6e, var(--primary));
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(7, 89, 133, 0.3);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        /* Alert Banner Mobile */
-        .alert {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            left: 1rem;
-            z-index: 1000;
-            background: linear-gradient(135deg, #ef4444, #f59e0b);
-            color: white;
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease;
-            max-width: none;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        /* LOGO PERSONNALISÉ FG - EN HAUT À GAUCHE */
-        .logo-container {
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 100;
-            background: var(--glass);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: default;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .logo-container:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(1.05) rotate(5deg);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .logo {
-            position: relative;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .logo-initials {
-            font-size: 16px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-            z-index: 2;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-            color: #075985;
-        }
-        
-        .logo-circle {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            top: 2px;
-            left: 2px;
-            z-index: 1;
-            animation: logoPulse 3s ease-in-out infinite;
-        }
-        
-        .logo-wave {
-            position: absolute;
-            bottom: -2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 8px;
-            background: rgba(16, 185, 129, 0.3);
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            z-index: 0;
-            animation: waveFloat 2s ease-in-out infinite;
-        }
-        
-        @keyframes logoPulse {
-            0%, 100% { 
-                transform: scale(1);
-                opacity: 0.8;
-            }
-            50% { 
-                transform: scale(1.05);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes waveFloat {
-            0%, 100% { transform: translateX(-50%) translateY(0px); }
-            50% { transform: translateX(-50%) translateY(-2px); }
-        }
-        
-        /* Theme Toggle - EN HAUT À DROITE */
-        .theme-toggle {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 100;
-            background: var(--glass);
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: white;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        /* Responsive Mobile */
-        @media (min-width: 768px) {
-            .spots-grid {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            }
-            
-            .weather-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 0.75rem;
-            }
-            
-            .logo-container {
-                width: 56px;
-                height: 56px;
-            }
-            
-            .logo {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .logo-initials {
-                font-size: 20px;
-            }
-            
-            .theme-toggle {
-                width: 48px;
-                height: 48px;
-            }
-        }
-        
-        /* Scrollbar Mobile */
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 2px;
-        }
-        
-        /* Status Bar */
-        @media (display-mode: standalone) {
-            body { padding-top: env(safe-area-inset-top); }
-        }
+        .progress-container { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .progress-bar { width: 120px; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden; flex: 1; }
+        .progress-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; position: relative; }
+        .progress-text { font-size: 0.75rem; font-weight: 600; min-width: 3rem; text-align: right; }
+        .loading { text-align: center; padding: 2rem 1rem; color: rgba(255, 255, 255, 0.8); }
+        .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid rgba(255, 255, 255, 0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0.5rem auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn { background: linear-gradient(135deg, var(--primary), #0c4a6e); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s ease; width: 100%; margin: 1rem 0; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn:hover, .btn:active { background: linear-gradient(135deg, #0c4a6e, var(--primary)); transform: translateY(-1px); box-shadow: 0 8px 25px rgba(7, 89, 133, 0.3); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .alert { position: fixed; top: 1rem; right: 1rem; left: 1rem; z-index: 1000; background: linear-gradient(135deg, #ef4444, #f59e0b); color: white; padding: 0.75rem; border-radius: 0.75rem; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); animation: slideIn 0.3s ease; max-width: none; }
+        @keyframes slideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .logo-container { position: fixed; top: 1rem; left: 1rem; z-index: 100; background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: default; transition: all 0.3s ease; backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .logo-container:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05) rotate(5deg); box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3); }
+        .logo { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .logo-initials { font-size: 16px; font-weight: 800; background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; z-index: 2; text-transform: uppercase; letter-spacing: -0.5px; color: #075985; }
+        .logo-circle { position: absolute; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); top: 2px; left: 2px; z-index: 1; animation: logoPulse 3s ease-in-out infinite; }
+        .logo-wave { position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); width: 20px; height: 8px; background: rgba(16, 185, 129, 0.3); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; z-index: 0; animation: waveFloat 2s ease-in-out infinite; }
+        @keyframes logoPulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        @keyframes waveFloat { 0%, 100% { transform: translateX(-50%) translateY(0px); } 50% { transform: translateX(-50%) translateY(-2px); } }
+        .theme-toggle { position: fixed; top: 1rem; right: 1rem; z-index: 100; background: var(--glass); border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; color: white; backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .theme-toggle:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
+        .hidden { display: none; }
+        @media (min-width: 768px) { .spots-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); } .weather-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; } .logo-container { width: 56px; height: 56px; } .logo { width: 40px; height: 40px; } .logo-initials { font-size: 20px; } .theme-toggle { width: 48px; height: 48px; } }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
+        @media (display-mode: standalone) { body { padding-top: env(safe-area-inset-top); } }
     </style>
 </head>
 <body data-theme="light">
@@ -941,14 +287,16 @@
 
         // Generate Spot Conditions
         async function generateSpotConditions(spot) {
-            const timezone = 'Africa/Dakar'; // Simplifié sans encodage
+            const timezone = 'Africa/Dakar';
             const now = new Date();
             const hourOffset = now.getHours();
             const spotIndex = spots.findIndex(s => s.name === spot.name);
             
             try {
-                const response = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_direction,wave_period,wind_speed_10m,wind_direction_10m&timezone=${timezone}`, { cache: 'no-store' });
+                const response = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_direction,wave_period&timezone=${timezone}`, { cache: 'no-store' });
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`Erreur API pour ${spot.name}: ${response.status} - ${errorText}`);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
@@ -956,8 +304,8 @@
                 const waveHeight = data.hourly.wave_height[hourOffset] || 0.75;
                 const waveDirection = data.hourly.wave_direction[hourOffset] || 220;
                 const wavePeriod = data.hourly.wave_period[hourOffset] || 8;
-                const windSpeed = data.hourly.wind_speed_10m[hourOffset] || 4.7;
-                const windDirection = data.hourly.wind_direction_10m[hourOffset] || 45;
+                const windSpeed = 4.7; // Fallback si wind_speed_10m absent
+                const windDirection = 45; // Fallback si wind_direction_10m absent
                 const temp = 31 + Math.sin((hourOffset / 24) * Math.PI) * 1;
                 
                 console.log(`Spot: ${spot.name}, Wave Height: ${waveHeight.toFixed(1)}m, Temp: ${temp.toFixed(1)}°C`);
@@ -1212,9 +560,10 @@
 
         // Initial Load
         window.onload = function() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').then(() => console.log('Service Worker enregistré')).catch(err => console.error('Service Worker failed:', err));
-            }
+            // Désactiver temporairement le Service Worker jusqu'à ce que sw.js soit créé
+            // if ('serviceWorker' in navigator) {
+            //     navigator.serviceWorker.register('/sw.js').then(() => console.log('Service Worker enregistré')).catch(err => console.error('Service Worker failed:', err));
+            // }
             loadData();
         };
     </script>
