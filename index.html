@@ -3,103 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Surf Dakar - Prévisions & Marées</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Surf Spots Dakar</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .spot { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .error { color: red; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-900">
-  <header class="bg-blue-600 text-white p-4 text-center text-xl font-bold">
-    Surf Dakar 🌊 - Prévisions & Marées
-  </header>
+<body>
+  <h1>Prévisions Surf Spots Dakar</h1>
 
-  <main class="p-4 space-y-6">
-
-    <!-- Spot Yoff -->
-    <div id="yoff" class="bg-white rounded-xl shadow-md p-4">
-      <h2 class="text-lg font-bold">🏄 Yoff</h2>
-      <p class="wave">🌊 Vagues: Chargement...</p>
-      <p class="wind">💨 Vent: Chargement...</p>
-      <p class="temp">🌡️ Température: Chargement...</p>
-    </div>
-
-    <!-- Spot Almadies -->
-    <div id="almadies" class="bg-white rounded-xl shadow-md p-4">
-      <h2 class="text-lg font-bold">🏄 Almadies</h2>
-      <p class="wave">🌊 Vagues: Chargement...</p>
-      <p class="wind">💨 Vent: Chargement...</p>
-      <p class="temp">🌡️ Température: Chargement...</p>
-    </div>
-
-    <!-- Spot Virage -->
-    <div id="virage" class="bg-white rounded-xl shadow-md p-4">
-      <h2 class="text-lg font-bold">🏄 Virage</h2>
-      <p class="wave">🌊 Vagues: Chargement...</p>
-      <p class="wind">💨 Vent: Chargement...</p>
-      <p class="temp">🌡️ Température: Chargement...</p>
-    </div>
-
-    <!-- Spot Ngor -->
-    <div id="ngor" class="bg-white rounded-xl shadow-md p-4">
-      <h2 class="text-lg font-bold">🏄 Ngor</h2>
-      <p class="wave">🌊 Vagues: Chargement...</p>
-      <p class="wind">💨 Vent: Chargement...</p>
-      <p class="temp">🌡️ Température: Chargement...</p>
-    </div>
-
-    <!-- Spot Ouakam -->
-    <div id="ouakam" class="bg-white rounded-xl shadow-md p-4">
-      <h2 class="text-lg font-bold">🏄 Ouakam</h2>
-      <p class="wave">🌊 Vagues: Chargement...</p>
-      <p class="wind">💨 Vent: Chargement...</p>
-      <p class="temp">🌡️ Température: Chargement...</p>
-    </div>
-
-  </main>
-
-  <footer class="bg-gray-800 text-white p-4 text-center">
-    Données fournies par Open-Meteo (Marine API)
-  </footer>
+  <div id="spots"></div>
 
   <script>
-    async function getSpotData(lat, lon, spotId) {
+    const spots = [
+      { name: "Yoff", lat: 14.749, lon: -17.5 },
+      { name: "Almadies", lat: 14.749, lon: -17.49 },
+      { name: "Le Virage", lat: 14.765, lon: -17.405 },
+      { name: "Ngor", lat: 14.722, lon: -17.49 },
+      { name: "Ouakam", lat: 14.73, lon: -17.49 }
+    ];
+
+    const spotsContainer = document.getElementById('spots');
+
+    async function fetchSpot(spot) {
+      const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wave_direction,windspeed_10m,winddirection_10m,sea_surface_temperature&timezone=Africa/Dakar`;
+
       try {
-        const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,wind_speed,wind_direction,water_temperature&timezone=Africa%2FAbidjan`;
-        const res = await fetch(url);
-        const data = await res.json();
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
 
-        // Heure actuelle
-        const now = new Date().getHours();
-        const waveHeight = data.hourly.wave_height[now];
-        const wavePeriod = data.hourly.wave_period[now];
-        const windSpeed = data.hourly.wind_speed[now];
-        const windDir = data.hourly.wind_direction[now];
-        const waterTemp = data.hourly.water_temperature[now];
+        // On prend les dernières valeurs horaires
+        const lastIndex = data.hourly.time.length - 1;
+        const waveHeight = data.hourly.wave_height[lastIndex];
+        const wavePeriod = data.hourly.wave_period[lastIndex];
+        const waveDirection = data.hourly.wave_direction[lastIndex];
+        const windSpeed = data.hourly.windspeed_10m[lastIndex];
+        const windDirection = data.hourly.winddirection_10m[lastIndex];
+        const waterTemp = data.hourly.sea_surface_temperature[lastIndex];
 
-        // Injection dans le HTML
-        document.querySelector(`#${spotId} .wave`).textContent =
-          `🌊 Vagues: ${waveHeight} m / ${wavePeriod}s`;
-        document.querySelector(`#${spotId} .wind`).textContent =
-          `💨 Vent: ${windSpeed} km/h / Dir ${windDir}°`;
-        document.querySelector(`#${spotId} .temp`).textContent =
-          `🌡️ Température eau: ${waterTemp} °C`;
-      } catch (err) {
-        console.error("Erreur API:", err);
-        document.querySelector(`#${spotId} .wave`).textContent = "Erreur de chargement ❌";
+        return `
+          <div class="spot">
+            <h2>🏄 ${spot.name}</h2>
+            <p>💨 Vent: ${windSpeed} km/h (${windDirection}°)</p>
+            <p>🌊 Vagues: ${waveHeight} m, période ${wavePeriod} s, direction ${waveDirection}°</p>
+            <p>🌡️ Température eau: ${waterTemp}°C</p>
+          </div>
+        `;
+      } catch (error) {
+        return `
+          <div class="spot">
+            <h2>🏄 ${spot.name}</h2>
+            <p class="error">Erreur de chargement ❌</p>
+            <p>💨 Vent: Chargement...</p>
+            <p>🌊 Vagues: Chargement...</p>
+            <p>🌡️ Température: Chargement...</p>
+          </div>
+        `;
       }
     }
 
-    // Coords des spots
-    const spots = {
-      yoff: { lat: 14.765, lon: -17.405 },
-      almadies: { lat: 14.740, lon: -17.500 },
-      virage: { lat: 14.730, lon: -17.490 },
-      ngor: { lat: 14.749, lon: -17.490 },
-      ouakam: { lat: 14.722, lon: -17.490 }
-    };
-
-    // Charger chaque spot
-    for (const spot in spots) {
-      getSpotData(spots[spot].lat, spots[spot].lon, spot);
+    async function loadAll() {
+      const spotHtml = await Promise.all(spots.map(fetchSpot));
+      spotsContainer.innerHTML = spotHtml.join('');
     }
+
+    // Chargement initial
+    loadAll();
+
+    // Actualisation toutes les 30 minutes
+    setInterval(loadAll, 30 * 60 * 1000);
   </script>
 </body>
 </html>
