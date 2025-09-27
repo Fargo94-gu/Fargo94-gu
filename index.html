@@ -941,13 +941,16 @@
 
         // Generate Spot Conditions
         async function generateSpotConditions(spot) {
-            const timezone = 'Africa%2FDakar';
+            const timezone = 'Africa/Dakar'; // Simplifié sans encodage
             const now = new Date();
             const hourOffset = now.getHours();
             const spotIndex = spots.findIndex(s => s.name === spot.name);
             
             try {
                 const response = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_direction,wave_period,wind_speed_10m,wind_direction_10m&timezone=${timezone}`, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 
                 const waveHeight = data.hourly.wave_height[hourOffset] || 0.75;
@@ -1000,7 +1003,7 @@
                     waveDirection: Math.round(waveDirection)
                 };
             } catch (error) {
-                console.warn(`Erreur fetch pour ${spot.name}:`, error);
+                console.error(`Erreur pour ${spot.name}:`, error);
                 const hourFactor = Math.sin((hourOffset / 24) * Math.PI) * 0.2 + (spotIndex * 0.05);
                 const fallbackHeight = (0.75 + hourFactor).toFixed(1);
                 const fallbackPeriod = (9 + hourFactor * 1).toFixed(1);
@@ -1026,7 +1029,10 @@
             const now = new Date();
             const currentHour = now.getHours();
             try {
-                const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=14.6937&longitude=-17.4441&hourly=temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Africa%2FDakar', { cache: 'no-store' });
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=14.6937&longitude=-17.4441&hourly=temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Africa/Dakar`, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 
                 weatherData = {
@@ -1071,7 +1077,7 @@
                     </div>
                 `;
             } catch (error) {
-                console.warn('API indisponible, mode dégradé');
+                console.error('Erreur météo:', error);
                 const hourFactor = Math.sin((currentHour / 24) * Math.PI) * 1;
                 const temp = Math.round(31 + hourFactor);
                 const windSpeed = Math.round(17 + hourFactor * 2);
