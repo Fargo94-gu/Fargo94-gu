@@ -462,13 +462,18 @@
             border-radius: 0.5rem;
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.9);
-            max-width: 100px;
+            max-width: 120px;
         }
         
         .wind-details p {
             margin: 0;
             line-height: 1.2;
             font-weight: 500;
+        }
+        
+        .wind-details .label {
+            font-weight: 600;
+            color: white;
         }
         
         /* Rating Mobile */
@@ -1158,10 +1163,9 @@
                                 <span class="wind-star animate"></span>
                             </div>
                             <div class="wind-details">
-                                <p>🌊 ${conditions.height}m</p>
-                                <p>⏱ ${conditions.period}s</p>
-                                <p>💨 ${conditions.windSpeed} km/h</p>
-                                <p>📍 ${conditions.windRelative}</p>
+                                <p><span class="label">Hauteur des vagues :</span> ${conditions.height}m</p>
+                                <p><span class="label">Période :</span> ${conditions.period}s</p>
+                                <p><span class="label">Direction :</span> ${conditions.windRelative}</p>
                             </div>
                         </div>
                         <div class="rating-section">
