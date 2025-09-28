@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
     <title>Surf Spots Dakar — Live</title>
     
-    <!-- Tailwind Mobile-First -->
+    <!-- Lien vers le CSS local (à configurer avec Tailwind plus tard) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Fonts -->
@@ -454,7 +454,6 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
-        /* Détails du vent */
         .wind-details {
             background: rgba(255, 255, 255, 0.05);
             padding: 0.25rem 0.5rem;
@@ -812,7 +811,7 @@
         
         <!-- Navigation (uniquement Aujourd'hui avec date) -->
         <div class="tabs">
-            <button class="tab active" onclick="loadData()">Aujourd'hui, 27 Septembre 2025</button>
+            <button class="tab active" onclick="loadData()">Aujourd'hui, 28 Septembre 2025</button>
         </div>
         
         <!-- Weather -->
@@ -923,16 +922,18 @@
             const spotIndex = spots.findIndex(s => s.name === spot.name);
             
             try {
-                const response = await fetch(`https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=waveHeight,wavePeriod,windSpeed,windDirection&source=noaa&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}`, {
+                const response = await fetch(`https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=waveHeight,wavePeriod,windSpeed,windDirection&source=noaa&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[1].split('.')[0]}`, {
                     headers: { 'Authorization': '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006' }
                 });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
-                const waveHeight = data.hours[hourOffset]?.waveHeight?.noaa || 0.75;
-                const wavePeriod = data.hours[hourOffset]?.wavePeriod?.noaa || 8;
-                const windSpeed = data.hours[hourOffset]?.windSpeed?.noaa || 4.7;
-                const windDirection = data.hours[hourOffset]?.windDirection?.noaa || 45;
+                // Trouver la donnée la plus proche de l'heure actuelle
+                const currentHourData = data.hours.find(h => new Date(h.time).getUTCHours() === hourOffset) || data.hours[0];
+                const waveHeight = currentHourData.waveHeight?.noaa || 0.75;
+                const wavePeriod = currentHourData.wavePeriod?.noaa || 8;
+                const windSpeed = currentHourData.windSpeed?.noaa || 4.7;
+                const windDirection = currentHourData.windDirection?.noaa || 45;
 
                 console.log(`Spot: ${spot.name}, Wave Height: ${waveHeight.toFixed(1)}m, Temp: 31°C`);
 
@@ -1074,11 +1075,13 @@
                         <div class="tide-type text-blue-400">Haute</div>
                         <div class="tide-time">${new Date(highTide.time).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>
                         <div class="tide-height">${highTide.height.toFixed(1)}m</div>
+                        <p class="text-sm text-white opacity-80 mt-1">L'eau est assez haute pour couvrir les récifs et rochers.</p>
                     </div>
                     <div class="tide-card">
                         <div class="tide-type text-red-400">Basse</div>
                         <div class="tide-time">${new Date(lowTide.time).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>
                         <div class="tide-height">${lowTide.height.toFixed(1)}m</div>
+                        <p class="text-sm text-white opacity-80 mt-1">L'eau est assez basse pour que les rochers et récifs soient exposés.</p>
                     </div>
                 `;
             } catch (error) {
@@ -1088,11 +1091,13 @@
                         <div class="tide-type text-blue-400">Haute</div>
                         <div class="tide-time">18:00</div>
                         <div class="tide-height">1.2m</div>
+                        <p class="text-sm text-white opacity-80 mt-1">L'eau est assez haute pour couvrir les récifs et rochers.</p>
                     </div>
                     <div class="tide-card">
                         <div class="tide-type text-red-400">Basse</div>
                         <div class="tide-time">00:00</div>
                         <div class="tide-height">0.4m</div>
+                        <p class="text-sm text-white opacity-80 mt-1">L'eau est assez basse pour que les rochers et récifs soient exposés.</p>
                     </div>
                 `;
             }
