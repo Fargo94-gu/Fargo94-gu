@@ -217,7 +217,7 @@
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
-            min-height: 320px; /* Ajusté pour inclure l'image */
+            min-height: 320px; /* Ajusté pour compenser l'absence d'image */
             display: flex;
             flex-direction: column;
         }
@@ -230,14 +230,6 @@
             right: 0;
             height: 3px;
             background: linear-gradient(90deg, var(--primary), var(--accent));
-        }
-        
-        .spot-image {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 0.75rem;
-            margin-bottom: 0.75rem;
         }
         
         .spot-header {
@@ -874,22 +866,22 @@
         let lastUpdate = null;
         let updateInterval;
 
-        // Spots Data - COORDONNÉES RÉELLES avec images royalty-free
+        // Spots Data - COORDONNÉES RÉELLES sans images
         const spots = [
-            { name: 'Yoff', lat: 14.6937, lon: -17.4441, icon: '🔥', description: 'Beach break exposé aux swells atlantiques', image: 'https://media.gettyimages.com/id/141862959/photo/fishermen-on-yoff-beach-dakar-senegal-africa.jpg' },
-            { name: 'Les Almadies', lat: 14.7264, lon: -17.5078, icon: '🤙', description: 'Point break rocheux', image: 'https://media.istockphoto.com/id/1146840961/photo/lighthouse-at-the-westernmost-part-of-mainland-africa-on-the-peninsula-of-almadies.jpg' },
-            { name: 'Le Virage', lat: 14.7000, lon: -17.4600, icon: '🏄‍♂️', description: 'Beach break familial', image: 'https://media.gettyimages.com/id/123456789/photo/dakar-coastline.jpg' },
-            { name: 'Ngor', lat: 14.7260, lon: -17.5070, icon: '🏄‍♂️', description: 'Spot paradisiaque', image: 'https://media.istockphoto.com/id/1146840962/photo/fishing-boats-in-ngor-dakar-senegal.jpg' },
-            { name: 'Ouakam', lat: 14.7500, lon: -17.4700, icon: '🤙', description: 'Reef break technique', image: 'https://media.dreamstime.com/sunrise-over-atlantic-ocean-seen-wooden-pier-ouakam-city-dakar-senegal-image213456789' },
-            { name: 'Secret Spot', lat: 14.6800, lon: -17.4200, icon: '🔥', description: 'Endroit caché', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3' },
-            { name: 'Vivier', lat: 14.7265, lon: -17.5080, icon: '🌊', description: 'Reef break puissant', image: 'https://media.gettyimages.com/id/123456790/photo/vivier-surf-spot-dakar.jpg' },
-            { name: 'Club Med', lat: 14.7270, lon: -17.5090, icon: '🏄', description: 'Reef break protégé', image: 'https://media.istockphoto.com/id/1146840963/photo/reef-protected-dakar.jpg' },
-            { name: 'Yene', lat: 14.7280, lon: -17.5100, icon: '🤙', description: 'Reef break courtes', image: 'https://media.gettyimages.com/id/123456791/photo/yene-reef-dakar.jpg' },
-            { name: 'Ndayan', lat: 14.7500, lon: -17.4000, icon: '🌴', description: 'Beach break sauvage', image: 'https://media.istockphoto.com/id/1146840964/photo/wild-beach-dakar.jpg' },
-            { name: 'Toubab Dialaw', lat: 14.5540, lon: -16.9990, icon: '🏖️', description: 'Beach break authentique', image: 'https://media.gettyimages.com/id/123456792/photo/toubab-dialaw-beach-senegal.jpg' },
-            { name: 'Vivier Reef', lat: 14.7250, lon: -17.5090, icon: '🌊', description: 'Point break barrels', image: 'https://images.unsplash.com/photo-1506905925347-21bda4d32df5?ixlib=rb-4.0.3' },
-            { name: 'Mamelles', lat: 14.7300, lon: -17.5000, icon: '🤙', description: 'Reef break puissant', image: 'https://media.gettyimages.com/id/123456793/photo/mamelles-reef-dakar.jpg' },
-            { name: 'Petite Côte', lat: 14.5000, lon: -17.0000, icon: '🏝️', description: 'Beach breaks uncrowded', image: 'https://media.istockphoto.com/id/1146840965/photo/petite-cote-beach-senegal.jpg' }
+            { name: 'Yoff', lat: 14.6937, lon: -17.4441, icon: '🔥', description: 'Beach break exposé aux swells atlantiques' },
+            { name: 'Les Almadies', lat: 14.7264, lon: -17.5078, icon: '🤙', description: 'Point break rocheux' },
+            { name: 'Le Virage', lat: 14.7000, lon: -17.4600, icon: '🏄‍♂️', description: 'Beach break familial' },
+            { name: 'Ngor', lat: 14.7260, lon: -17.5070, icon: '🏄‍♂️', description: 'Spot paradisiaque' },
+            { name: 'Ouakam', lat: 14.7500, lon: -17.4700, icon: '🤙', description: 'Reef break technique' },
+            { name: 'Secret Spot', lat: 14.6800, lon: -17.4200, icon: '🔥', description: 'Endroit caché' },
+            { name: 'Vivier', lat: 14.7265, lon: -17.5080, icon: '🌊', description: 'Reef break puissant' },
+            { name: 'Club Med', lat: 14.7270, lon: -17.5090, icon: '🏄', description: 'Reef break protégé' },
+            { name: 'Yene', lat: 14.7280, lon: -17.5100, icon: '🤙', description: 'Reef break courtes' },
+            { name: 'Ndayan', lat: 14.7500, lon: -17.4000, icon: '🌴', description: 'Beach break sauvage' },
+            { name: 'Toubab Dialaw', lat: 14.5540, lon: -16.9990, icon: '🏖️', description: 'Beach break authentique' },
+            { name: 'Vivier Reef', lat: 14.7250, lon: -17.5090, icon: '🌊', description: 'Point break barrels' },
+            { name: 'Mamelles', lat: 14.7300, lon: -17.5000, icon: '🤙', description: 'Reef break puissant' },
+            { name: 'Petite Côte', lat: 14.5000, lon: -17.0000, icon: '🏝️', description: 'Beach breaks uncrowded' }
         ];
 
         // Weather Emojis
@@ -1130,7 +1122,6 @@
                             <h3 class="spot-title">${spot.name}</h3>
                             <span class="spot-icon">${spot.icon}</span>
                         </div>
-                        <img src="${spot.image}" alt="${spot.name} photo" class="spot-image">
                         <span class="spot-difficulty difficulty-${conditions.dynamicDifficulty.toLowerCase()}">${conditions.dynamicDifficulty}</span>
                         <p class="spot-description">${spot.description}</p>
                         <div class="wave-conditions">
