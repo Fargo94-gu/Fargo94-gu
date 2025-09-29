@@ -866,14 +866,22 @@
         let lastUpdate = null;
         let updateInterval;
 
-        // Spots Data - COORDONNÉES RÉELLES
+        // Spots Data - COORDONNÉES RÉELLES (Remplacé par les 14 nouveaux spots)
         const spots = [
             { name: 'Yoff', lat: 14.6937, lon: -17.4441, icon: '🔥', description: 'Beach break exposé aux swells atlantiques' },
-            { name: 'Les Almadies', lat: 14.7264, lon: -17.5078, icon: '🤙', description: 'Point break rocheux, vagues consistantes' },
-            { name: 'Le Virage', lat: 14.7000, lon: -17.4600, icon: '🏄‍♂️', description: 'Beach break familial avec sable fin' },
-            { name: 'Ngor', lat: 14.7260, lon: -17.5070, icon: '🏄‍♂️', description: 'Spot paradisiaque avec vue sur l\'île' },
-            { name: 'Ouakam', lat: 14.7500, lon: -17.4700, icon: '🤙', description: 'Reef break technique près du phare' },
-            { name: 'Secret Spot', lat: 14.6800, lon: -17.4200, icon: '🔥', description: 'Endroit caché pour tubes mystiques' }
+            { name: 'Les Almadies', lat: 14.7264, lon: -17.5078, icon: '🤙', description: 'Point break rocheux' },
+            { name: 'Le Virage', lat: 14.7000, lon: -17.4600, icon: '🏄‍♂️', description: 'Beach break familial' },
+            { name: 'Ngor', lat: 14.7260, lon: -17.5070, icon: '🏄‍♂️', description: 'Spot paradisiaque' },
+            { name: 'Ouakam', lat: 14.7500, lon: -17.4700, icon: '🤙', description: 'Reef break technique' },
+            { name: 'Secret Spot', lat: 14.6800, lon: -17.4200, icon: '🔥', description: 'Endroit caché' },
+            { name: 'Vivier', lat: 14.7265, lon: -17.5080, icon: '🌊', description: 'Reef break puissant' },
+            { name: 'Club Med', lat: 14.7270, lon: -17.5090, icon: '🏄', description: 'Reef break protégé' },
+            { name: 'Yene', lat: 14.7280, lon: -17.5100, icon: '🤙', description: 'Reef break courtes' },
+            { name: 'Ndayan', lat: 14.7500, lon: -17.4000, icon: '🌴', description: 'Beach break sauvage' },
+            { name: 'Toubab Dialaw', lat: 14.5540, lon: -16.9990, icon: '🏖️', description: 'Beach break authentique' },
+            { name: 'Vivier Reef', lat: 14.7250, lon: -17.5090, icon: '🌊', description: 'Point break barrels' },
+            { name: 'Mamelles', lat: 14.7300, lon: -17.5000, icon: '🤙', description: 'Reef break puissant' },
+            { name: 'Petite Côte', lat: 14.5000, lon: -17.0000, icon: '🏝️', description: 'Beach breaks uncrowded' }
         ];
 
         // Weather Emojis
