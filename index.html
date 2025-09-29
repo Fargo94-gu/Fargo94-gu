@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
     <title>Surf Spots Dakar — Live</title>
     
-    <!-- Lien vers le CSS local (à configurer avec Tailwind plus tard) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lien vers le CSS local (à configurer avec Tailwind une fois installé) -->
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Temporaire, à remplacer par output.css -->
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- CSS intégré -->
+    <!-- CSS intégré (temporaire, à déplacer dans un fichier CSS local) -->
     <style>
         /* Mobile-First Typography */
         * { font-family: 'Inter', sans-serif; }
@@ -374,7 +374,7 @@
             letter-spacing: 0.05em;
         }
         
-        /* Wind Rose Compact avec détails */
+        /* Wind Rose Compact avec détails (flèche enlevée) */
         .wind-rose-container {
             display: flex;
             align-items: center;
@@ -419,11 +419,9 @@
             color: rgba(255, 255, 255, 0.6);
         }
         
+        /* Flèche enlevée */
         .wind-arrow {
-            font-size: 1.25rem;
-            color: #60a5fa;
-            z-index: 3;
-            transition: transform 0.3s ease;
+            display: none; /* Supprime la flèche ➡️ */
         }
         
         /* Étoile Bleue Réduite */
@@ -454,6 +452,7 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
+        /* Détails du vent */
         .wind-details {
             background: rgba(255, 255, 255, 0.05);
             padding: 0.25rem 0.5rem;
@@ -811,7 +810,7 @@
         
         <!-- Navigation (uniquement Aujourd'hui avec date) -->
         <div class="tabs">
-            <button class="tab active" onclick="loadData()">Aujourd'hui, 28 Septembre 2025</button>
+            <button class="tab active" onclick="loadData()">Aujourd'hui, 29 Septembre 2025</button>
         </div>
         
         <!-- Weather -->
@@ -922,18 +921,16 @@
             const spotIndex = spots.findIndex(s => s.name === spot.name);
             
             try {
-                const response = await fetch(`https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=waveHeight,wavePeriod,windSpeed,windDirection&source=noaa&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[1].split('.')[0]}`, {
+                const response = await fetch(`https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=waveHeight,wavePeriod,windSpeed,windDirection&source=noaa&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}`, {
                     headers: { 'Authorization': '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006' }
                 });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
-                // Trouver la donnée la plus proche de l'heure actuelle
-                const currentHourData = data.hours.find(h => new Date(h.time).getUTCHours() === hourOffset) || data.hours[0];
-                const waveHeight = currentHourData.waveHeight?.noaa || 0.75;
-                const wavePeriod = currentHourData.wavePeriod?.noaa || 8;
-                const windSpeed = currentHourData.windSpeed?.noaa || 4.7;
-                const windDirection = currentHourData.windDirection?.noaa || 45;
+                const waveHeight = data.hours[hourOffset]?.waveHeight?.noaa || 0.75;
+                const wavePeriod = data.hours[hourOffset]?.wavePeriod?.noaa || 8;
+                const windSpeed = data.hours[hourOffset]?.windSpeed?.noaa || 4.7;
+                const windDirection = data.hours[hourOffset]?.windDirection?.noaa || 45;
 
                 console.log(`Spot: ${spot.name}, Wave Height: ${waveHeight.toFixed(1)}m, Temp: 31°C`);
 
@@ -1141,7 +1138,6 @@
                         <div class="wind-rose-container">
                             <div class="wind-rose">
                                 <span class="wind-compass">N</span>
-                                <span class="wind-arrow" style="transform: rotate(${conditions.waveDirection - 90}deg)">➡️</span>
                                 <span class="wind-star animate"></span>
                             </div>
                             <div class="wind-details">
