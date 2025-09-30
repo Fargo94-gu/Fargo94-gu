@@ -66,7 +66,7 @@
             z-index: -1;
         }
         
-        /* Glass Cards */
+        /* Glass Cards avec transition */
         .glass {
             background: var(--glass);
             backdrop-filter: blur(12px);
@@ -75,6 +75,18 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             margin: 0.5rem 0;
             padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-content {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .glass-content.active {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .glass:hover {
@@ -125,17 +137,17 @@
             font-weight: 500;
             font-size: 0.875rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
         
         .tab.active {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.3); /* Fond clair pour onglet actif */
             color: white;
             font-weight: 600;
         }
         
         .tab:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
         }
         
@@ -705,7 +717,7 @@
         <!-- Weather -->
         <div class="glass">
             <h2 class="text-lg font-bold text-center mb-3">🌤️ Météo</h2>
-            <div id="weatherContent" class="weather-grid">
+            <div id="weatherContent" class="weather-grid glass-content">
                 <div class="loading">
                     <div class="spinner"></div>
                     <p>Chargement météo...</p>
@@ -716,7 +728,7 @@
         <!-- Tides -->
         <div class="glass">
             <h2 class="text-lg font-bold text-center mb-3">🌊 Marées</h2>
-            <div id="tidesContent" class="tide-grid">
+            <div id="tidesContent" class="tide-grid glass-content">
                 <div class="loading">
                     <div class="spinner"></div>
                     <p>Calcul marées...</p>
@@ -727,7 +739,7 @@
         <!-- Spots -->
         <div class="glass">
             <h2 class="text-lg font-bold text-center mb-3">🏄‍♂️ Spots de Surf</h2>
-            <div id="spotsContent" class="spots-grid">
+            <div id="spotsContent" class="spots-grid glass-content">
                 <div class="loading col-span-full">
                     <div class="spinner"></div>
                     <p>Analyse conditions...</p>
@@ -920,6 +932,7 @@
                         </div>
                     </div>
                 `;
+                document.getElementById('weatherContent').classList.add('active');
             } catch (error) {
                 console.error('Erreur météo:', error);
                 document.getElementById('weatherContent').innerHTML = `
@@ -940,6 +953,7 @@
                         </div>
                     </div>
                 `;
+                document.getElementById('weatherContent').classList.add('active');
             }
         }
 
@@ -973,6 +987,7 @@
                         <p class="text-sm text-white opacity-80 mt-1">L'eau est assez basse.</p>
                     </div>
                 `;
+                document.getElementById('tidesContent').classList.add('active');
             } catch (error) {
                 console.error('Erreur marées:', error);
                 const offset = Math.floor((now.getHours() + 1) / 6) * 6;
@@ -990,6 +1005,7 @@
                         <p class="text-sm text-white opacity-80 mt-1">L'eau est assez basse.</p>
                     </div>
                 `;
+                document.getElementById('tidesContent').classList.add('active');
             }
         }
 
@@ -1052,6 +1068,8 @@
                 `;
             }
             spotsContent.innerHTML = spotsHtml;
+            document.getElementById('spotsContent').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Remonte en haut après chargement
         }
 
         // Load All Data
@@ -1059,6 +1077,9 @@
             currentRegion = region; // Met à jour la région actuelle
             document.getElementById('refreshBtn').disabled = true;
             document.getElementById('btnIcon').textContent = '⏳';
+            
+            // Retire la classe active pour lancer l'animation
+            document.querySelectorAll('.glass-content').forEach(content => content.classList.remove('active'));
             
             weatherData = {};
             
