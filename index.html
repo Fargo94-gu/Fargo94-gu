@@ -25,7 +25,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- CSS intégré avec image en background -->
+    <!-- CSS intégré sans image en background -->
     <style>
         /* Mobile-First Typography */
         * { font-family: 'Inter', sans-serif; }
@@ -45,11 +45,9 @@
             color-scheme: dark;
         }
         
-        /* Mobile Background avec image */
+        /* Mobile Background sans image, juste un dégradé sombre */
         body {
-            /* Remplace cette URL par le lien direct de ton image (ex. ImgBB ou GitHub Pages) */
-            background: url('https://example.com/votre-image.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: linear-gradient(135deg, #1e293b, #0f172a); /* Dégradé sombre par défaut */
             color: white;
             min-height: 100vh;
             padding: 0.5rem;
@@ -65,7 +63,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4); /* Ajoute une légère opacité noire */
+            background: rgba(0, 0, 0, 0.4); /* Opacité noire légère */
             z-index: -1;
         }
         
@@ -756,7 +754,7 @@
         let lastUpdate = null;
         let updateInterval;
 
-        // Spots Data
+        // Spots Data (Toubab Dialaw supprimé)
         const spots = [
             { name: 'Yoff', lat: 14.6937, lon: -17.4441, icon: '🔥', description: 'Beach break exposé aux swells atlantiques' },
             { name: 'Les Almadies', lat: 14.7264, lon: -17.5078, icon: '🤙', description: 'Point break rocheux' },
@@ -768,7 +766,6 @@
             { name: 'Club Med', lat: 14.7270, lon: -17.5090, icon: '🏄', description: 'Reef break protégé' },
             { name: 'Yene', lat: 14.7280, lon: -17.5100, icon: '🤙', description: 'Reef break courtes' },
             { name: 'Ndayan', lat: 14.7500, lon: -17.4000, icon: '🌴', description: 'Beach break sauvage' },
-            { name: 'Toubab Dialaw', lat: 14.5540, lon: -16.9990, icon: '🏖️', description: 'Beach break authentique' },
             { name: 'Vivier Reef', lat: 14.7250, lon: -17.5090, icon: '🌊', description: 'Point break barrels' },
             { name: 'Mamelles', lat: 14.7300, lon: -17.5000, icon: '🤙', description: 'Reef break puissant' },
             { name: 'Petite Côte', lat: 14.5000, lon: -17.0000, icon: '🏝️', description: 'Beach breaks uncrowded' }
