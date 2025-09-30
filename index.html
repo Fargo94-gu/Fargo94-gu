@@ -25,15 +25,15 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <!-- CSS intégré sans image en background -->
+    <!-- CSS intégré avec nouveau dégradé bleu-vert -->
     <style>
         /* Mobile-First Typography */
         * { font-family: 'Inter', sans-serif; }
         
         /* Root Variables */
         :root {
-            --primary: #075985;
-            --accent: #10b981;
+            --primary: #075985; /* Bleu profond */
+            --accent: #10b981; /* Vert émeraude */
             --warning: #f59e0b;
             --danger: #ef4444;
             --glass: rgba(255, 255, 255, 0.1);
@@ -45,9 +45,9 @@
             color-scheme: dark;
         }
         
-        /* Mobile Background sans image, juste un dégradé sombre */
+        /* Mobile Background avec dégradé bleu-vert */
         body {
-            background: linear-gradient(135deg, #1e293b, #0f172a); /* Dégradé sombre par défaut */
+            background: linear-gradient(135deg, #075985, #10b981); /* Dégradé de bleu à vert */
             color: white;
             min-height: 100vh;
             padding: 0.5rem;
@@ -63,7 +63,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4); /* Opacité noire légère */
+            background: rgba(0, 0, 0, 0.4); /* Opacité noire légère pour contraste */
             z-index: -1;
         }
         
@@ -754,7 +754,7 @@
         let lastUpdate = null;
         let updateInterval;
 
-        // Spots Data (Toubab Dialaw supprimé)
+        // Spots Data (Toubab Dialaw déjà supprimé)
         const spots = [
             { name: 'Yoff', lat: 14.6937, lon: -17.4441, icon: '🔥', description: 'Beach break exposé aux swells atlantiques' },
             { name: 'Les Almadies', lat: 14.7264, lon: -17.5078, icon: '🤙', description: 'Point break rocheux' },
