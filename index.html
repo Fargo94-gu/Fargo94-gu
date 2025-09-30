@@ -2,10 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
     <title>Surf Spots Afrique — Live</title>
     
-    <!-- Lien vers le CSS local (à configurer avec Tailwind une fois installé) -->
+    <!-- Lien vers Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Fonts -->
@@ -736,7 +736,7 @@
         </div>
         
         <!-- Refresh Button -->
-        <button id="refreshBtn" class="btn" onclick="loadData()">
+        <button id="refreshBtn" class="btn" onclick="loadData(currentRegion)">
             <span id="btnIcon">🔄</span>
             Actualiser
         </button>
@@ -753,6 +753,7 @@
         let weatherData = {};
         let lastUpdate = null;
         let updateInterval;
+        let currentRegion = 'dakar'; // Région par défaut
 
         // Spots Data
         const spotsDakar = [
@@ -817,7 +818,7 @@
         }
 
         // Generate Spot Conditions
-        async function generateSpotConditions(spot) {
+        async function generateSpotConditions(spot, spotList) {
             const now = new Date();
             const hourOffset = now.getHours();
             const spotIndex = spotList.findIndex(s => s.name === spot.name);
@@ -825,13 +826,13 @@
                 const stormglassData = await fetchWithFallback(
                     `https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=waveHeight,wavePeriod,windSpeed,windDirection&source=noaa&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}`,
                     { headers: { 'Authorization': '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006' } },
-                    `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wind_speed_10m,wind_direction_10m&timezone=Africa/Dakar`
+                    `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}&hourly=wave_height,wave_period,wind_speed_10m,wind_direction_10m&timezone=Africa/${currentRegion === 'maroc' ? 'Casablanca' : 'Dakar'}`
                 );
-                const data = stormglassData.hours ? stormglassData : { hours: [{ time: now.toISOString(), ...stormglassData.hourly[hourOffset] }] };
-                const waveHeight = data.hours[hourOffset]?.waveHeight?.noaa || data.hourly?.wave_height || 0.75;
-                const wavePeriod = data.hours[hourOffset]?.wavePeriod?.noaa || data.hourly?.wave_period || 8;
-                const windSpeed = data.hours[hourOffset]?.windSpeed?.noaa || data.hourly?.wind_speed_10m || 4.7;
-                const windDirection = data.hours[hourOffset]?.windDirection?.noaa || data.hourly?.wind_direction_10m || 45;
+                const data = stormglassData.hours ? stormglassData.hours[hourOffset] : stormglassData.hourly[hourOffset];
+                const waveHeight = data?.waveHeight?.noaa || data?.wave_height || 0.75;
+                const wavePeriod = data?.wavePeriod?.noaa || data?.wave_period || 8;
+                const windSpeed = data?.windSpeed?.noaa || data?.wind_speed_10m || 4.7;
+                const windDirection = data?.windDirection?.noaa || data?.wind_direction_10m || 45;
 
                 let dynamicDifficulty = spot.difficulty || 'beginner';
                 if (waveHeight >= 0.8 && dynamicDifficulty !== 'expert') dynamicDifficulty = 'intermediate';
@@ -882,24 +883,24 @@
             }
         }
 
-        // Load Weather (ajusté pour région)
-        async function loadWeather(region) {
-            const lat = region === 'maroc' ? 30.138 : 14.6937; // Anchor Point ou Yoff comme référence
-            const lon = region === 'maroc' ? -9.697 : -17.4441;
+        // Load Weather
+        async function loadWeather() {
+            const lat = currentRegion === 'maroc' ? 30.138 : 14.6937; // Anchor Point ou Yoff
+            const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
             const now = new Date();
             const currentHour = now.getHours();
             try {
                 const stormglassData = await fetchWithFallback(
                     `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lon}&params=airTemperature,windSpeed,windDirection&source=noaa&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}`,
                     { headers: { 'Authorization': '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006' } },
-                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m&timezone=Africa/${region === 'maroc' ? 'Casablanca' : 'Dakar'}`
+                    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m&timezone=Africa/${currentRegion === 'maroc' ? 'Casablanca' : 'Dakar'}`
                 );
-                const data = stormglassData.hours ? stormglassData : { hours: [{ time: now.toISOString(), ...stormglassData.hourly[currentHour] }] };
-                const tempCurrent = data.hours[currentHour]?.airTemperature?.noaa || data.hourly?.temperature_2m || 28;
+                const data = stormglassData.hours ? stormglassData.hours[currentHour] : stormglassData.hourly[currentHour];
+                const tempCurrent = data?.airTemperature?.noaa || data?.temperature_2m || 28;
                 const tempMin = Math.round(Math.max(27, tempCurrent - 1));
                 const tempMax = Math.round(Math.min(30, tempCurrent + 2));
-                const windSpeed = data.hours[currentHour]?.windSpeed?.noaa || data.hourly?.wind_speed_10m || 4.7;
-                const windDir = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round((data.hours[currentHour]?.windDirection?.noaa || data.hourly?.wind_direction_10m || 0) / 45) % 8];
+                const windSpeed = data?.windSpeed?.noaa || data?.wind_speed_10m || 4.7;
+                const windDir = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round((data?.windDirection?.noaa || data?.wind_direction_10m || 0) / 45) % 8];
 
                 document.getElementById('weatherContent').innerHTML = `
                     <div class="weather-card">
@@ -942,10 +943,10 @@
             }
         }
 
-        // Load Tides (ajusté pour région)
-        async function loadTides(region) {
-            const lat = region === 'maroc' ? 30.138 : 14.6937;
-            const lon = region === 'maroc' ? -9.697 : -17.4441;
+        // Load Tides
+        async function loadTides() {
+            const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
+            const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
             const now = new Date();
             const start = new Date(now.setHours(0, 0, 0, 0)).toISOString();
             const end = new Date(now.setHours(23, 59, 59, 999)).toISOString();
@@ -999,7 +1000,7 @@
             
             let spotsHtml = '';
             for (const spot of spotList) {
-                const conditions = await generateSpotConditions(spot);
+                const conditions = await generateSpotConditions(spot, spotList);
                 spotsHtml += `
                     <div class="spot-card">
                         <div class="spot-header">
@@ -1054,15 +1055,16 @@
         }
 
         // Load All Data
-        async function loadData(region = 'dakar') {
+        async function loadData(region) {
+            currentRegion = region; // Met à jour la région actuelle
             document.getElementById('refreshBtn').disabled = true;
             document.getElementById('btnIcon').textContent = '⏳';
             
             weatherData = {};
             
-            await loadWeather(region);
-            await loadTides(region);
-            const spotList = region === 'maroc' ? spotsMaroc : spotsDakar;
+            await loadWeather();
+            await loadTides();
+            const spotList = currentRegion === 'maroc' ? spotsMaroc : spotsDakar;
             await loadSpots(spotList);
             
             lastUpdate = new Date();
@@ -1070,12 +1072,9 @@
             document.getElementById('refreshBtn').disabled = false;
             document.getElementById('btnIcon').textContent = '🔄';
             
-            // Active le bon onglet
+            // Gestion des onglets actifs
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelector(`.tab[onclick="loadData('${region}')"]`).classList.add('active');
-            
-            if (updateInterval) clearInterval(updateInterval);
-            updateInterval = setInterval(() => loadData(region), 3600000);
+            document.querySelector(`.tab[onclick="loadData('${currentRegion}')"]`).classList.add('active');
         }
 
         // Initial Load
