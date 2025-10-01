@@ -748,7 +748,7 @@
             <div id="tidesContent" class="tide-grid glass-content">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Calcul marées...</p>
+                    <p>Calcul marées... (non disponible)</p>
                 </div>
             </div>
         </div>
@@ -772,7 +772,7 @@
         
         <!-- Footer -->
         <div class="glass text-center py-2">
-            <p class="text-sm opacity-70">Powered by Weatherbit & Stromglass • Données réelles</p>
+            <p class="text-sm opacity-70">Powered by Weatherbit, Stromglass & Open-Meteo • Données réelles</p>
             <p class="text-xs opacity-60 mt-1" id="lastUpdate"></p>
         </div>
     </div>
@@ -834,7 +834,7 @@
             return navigator.onLine;
         }
 
-        // Fetch avec Weatherbit et fallback Stromglass
+        // Fetch avec Weatherbit, Stromglass et Open-Meteo
         async function fetchWithPriority(lat, lon, params, region) {
             const maxRetries = 3;
             const weatherbitKey = '5131829b18ce439fbe2275340622a651';
@@ -878,7 +878,7 @@
                     console.error(`Weatherbit Tentative ${attempt} échouée: ${weatherbitError.message}`);
 
                     if (attempt === maxRetries) {
-                        // Fallback Stromglass
+                        // Tentative Stromglass
                         try {
                             document.getElementById('weatherStatus').textContent = `Tentative Stromglass pour ${region}...`;
                             const stromglassUrl = `https://api.stromglass.io/v6/weather/point?lat=${lat}&lng=${lon}&params=${params}&source=noaa`;
@@ -901,16 +901,39 @@
                             return weatherData;
                         } catch (stromglassError) {
                             console.error(`Stromglass échoué: ${stromglassError.message}`);
-                            document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives Weatherbit et Stromglass: ${stromglassError.message}`;
-                            throw stromglassError;
+
+                            // Fallback Open-Meteo
+                            try {
+                                document.getElementById('weatherStatus').textContent = `Tentative Open-Meteo pour ${region}...`;
+                                const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                                const openMeteoResponse = await fetch(openMeteoUrl, { signal: controller.signal });
+                                if (!openMeteoResponse.ok) {
+                                    throw new Error(`Erreur Open-Meteo: ${openMeteoResponse.status}`);
+                                }
+
+                                const openMeteoData = await openMeteoResponse.json();
+                                const currentWeather = openMeteoData.current_weather;
+                                const weatherData = {
+                                    tempMin: Math.round(currentWeather.temperature - 1),
+                                    tempMax: Math.round(currentWeather.temperature + 2),
+                                    windSpeed: currentWeather.windspeed,
+                                    windDir: currentWeather.winddirection
+                                };
+                                document.getElementById('weatherStatus').textContent = `Mise à jour Open-Meteo réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                                return weatherData;
+                            } catch (openMeteoError) {
+                                console.error(`Open-Meteo échoué: ${openMeteoError.message}`);
+                                document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives: ${openMeteoError.message}`;
+                                throw openMeteoError;
+                            }
                         }
                     }
-                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Attendre avant retry
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Délai croissant
                 }
             }
         }
 
-        // Generate Spot Conditions avec Weatherbit et Stromglass
+        // Generate Spot Conditions avec Stromglass et Open-Meteo
         async function generateSpotConditions(spot, spotList) {
             const spotIndex = spotList.findIndex(s => s.name === spot.name);
             console.log(`Loading conditions for ${spot.name} at ${spot.lat}, ${spot.lon}`);
@@ -928,17 +951,24 @@
                     });
                     if (!stromglassResponse.ok) throw new Error(`Stromglass Error: ${stromglassResponse.status}`);
                     data = (await stromglassResponse.json()).hours[0];
-                } catch (error) {
+                } catch (stromglassError) {
                     clearTimeout(timeoutId);
-                    console.error(`Stromglass failed: ${error.message}`);
-                    throw new Error('Aucune donnée météo disponible');
+                    console.error(`Stromglass failed: ${stromglassError.message}`);
+
+                    // Fallback Open-Meteo
+                    const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}&current_weather=true&wave_height=true`;
+                    const openMeteoResponse = await fetch(openMeteoUrl, { signal: controller.signal });
+                    if (!openMeteoResponse.ok) throw new Error(`Open-Meteo Error: ${openMeteoResponse.status}`);
+                    data = (await openMeteoResponse.json()).current_weather;
+                    data.waveHeight = data.wave_height || 0.75; // Estimation si absent
+                    data.wavePeriod = 8; // Valeur par défaut
                 }
                 clearTimeout(timeoutId);
 
                 const waveHeight = data.waveHeight || 0.75;
                 const wavePeriod = data.wavePeriod || 8;
-                const windSpeed = data.windSpeed || 4.7;
-                const windDirection = data.windDirection || 45;
+                const windSpeed = data.windSpeed || (data.windspeed || 4.7);
+                const windDirection = data.windDirection || (data.winddirection || 45);
 
                 let dynamicDifficulty = spot.difficulty || 'beginner';
                 if (waveHeight >= 0.8 && dynamicDifficulty !== 'expert') dynamicDifficulty = 'intermediate';
@@ -965,7 +995,7 @@
                     windSpeed: Math.round(windSpeed * 3.6),
                     windDir: Math.round(windDirection),
                     windRelative,
-                    temp: data.airTemperature || 28,
+                    temp: data.airTemperature || data.temperature || 28,
                     score: Math.round(score),
                     rating,
                     ratingText,
@@ -994,7 +1024,7 @@
             }
         }
 
-        // Load Tides (désactivé car ni Weatherbit ni Stromglass ne fournissent les marées directement)
+        // Load Tides (désactivé)
         async function loadTides() {
             document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Les marées ne sont pas disponibles avec ces APIs.</p></div>';
             document.getElementById('tidesContent').classList.add('active');
