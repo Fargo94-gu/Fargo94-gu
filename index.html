@@ -772,7 +772,7 @@
         
         <!-- Footer -->
         <div class="glass text-center py-2">
-            <p class="text-sm opacity-70">Powered by Weatherbit • Données réelles</p>
+            <p class="text-sm opacity-70">Powered by Weatherbit & Stromglass • Données réelles</p>
             <p class="text-xs opacity-60 mt-1" id="lastUpdate"></p>
         </div>
     </div>
@@ -834,11 +834,12 @@
             return navigator.onLine;
         }
 
-        // Fetch avec retry et timeout
+        // Fetch avec Weatherbit et fallback Stromglass
         async function fetchWithPriority(lat, lon, params, region) {
             const maxRetries = 3;
             const weatherbitKey = '5131829b18ce439fbe2275340622a651';
-            const timeoutMs = 5000; // 5 secondes
+            const stromglassKey = '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006';
+            const timeoutMs = 5000;
 
             for (let attempt = 1; attempt <= maxRetries; attempt++) {
                 if (!checkNetwork()) {
@@ -850,16 +851,17 @@
                 const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
                 try {
+                    // Tentative Weatherbit
                     document.getElementById('weatherStatus').textContent = `Tentative Weatherbit ${attempt}/${maxRetries} pour ${region}...`;
                     const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${weatherbitKey}&include=minutely`;
-                    const response = await fetch(weatherbitUrl, { signal: controller.signal });
+                    const weatherbitResponse = await fetch(weatherbitUrl, { signal: controller.signal });
                     clearTimeout(timeoutId);
 
-                    if (!response.ok) {
-                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    if (!weatherbitResponse.ok) {
+                        throw new Error(`Erreur Weatherbit: ${weatherbitResponse.status}`);
                     }
 
-                    const weatherbitData = await response.json();
+                    const weatherbitData = await weatherbitResponse.json();
                     const tempCurrent = weatherbitData.data[0].temp;
                     const windSpeed = weatherbitData.data[0].wind_spd;
                     const windDir = weatherbitData.data[0].wind_dir;
@@ -869,47 +871,74 @@
                         windSpeed,
                         windDir
                     };
-                    document.getElementById('weatherStatus').textContent = `Mise à jour réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                    document.getElementById('weatherStatus').textContent = `Mise à jour Weatherbit réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
                     return weatherData;
-                } catch (error) {
+                } catch (weatherbitError) {
                     clearTimeout(timeoutId);
-                    console.error(`Tentative ${attempt} échouée: ${error.message}`);
+                    console.error(`Weatherbit Tentative ${attempt} échouée: ${weatherbitError.message}`);
+
                     if (attempt === maxRetries) {
-                        document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives: ${error.message}`;
-                        throw error;
+                        // Fallback Stromglass
+                        try {
+                            document.getElementById('weatherStatus').textContent = `Tentative Stromglass pour ${region}...`;
+                            const stromglassUrl = `https://api.stromglass.io/v6/weather/point?lat=${lat}&lng=${lon}&params=${params}&source=noaa`;
+                            const stromglassResponse = await fetch(stromglassUrl, {
+                                headers: { 'Authorization': stromglassKey }
+                            });
+                            if (!stromglassResponse.ok) {
+                                throw new Error(`Erreur Stromglass: ${stromglassResponse.status}`);
+                            }
+
+                            const stromglassData = await stromglassResponse.json();
+                            const latestData = stromglassData.hours[0];
+                            const weatherData = {
+                                tempMin: Math.round(latestData.airTemperature - 1),
+                                tempMax: Math.round(latestData.airTemperature + 2),
+                                windSpeed: latestData.windSpeed,
+                                windDir: latestData.windDirection
+                            };
+                            document.getElementById('weatherStatus').textContent = `Mise à jour Stromglass réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                            return weatherData;
+                        } catch (stromglassError) {
+                            console.error(`Stromglass échoué: ${stromglassError.message}`);
+                            document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives Weatherbit et Stromglass: ${stromglassError.message}`;
+                            throw stromglassError;
+                        }
                     }
                     await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Attendre avant retry
                 }
             }
         }
 
-        // Generate Spot Conditions avec uniquement Weatherbit
+        // Generate Spot Conditions avec Weatherbit et Stromglass
         async function generateSpotConditions(spot, spotList) {
             const spotIndex = spotList.findIndex(s => s.name === spot.name);
             console.log(`Loading conditions for ${spot.name} at ${spot.lat}, ${spot.lon}`);
 
             try {
-                const weatherbitKey = '5131829b18ce439fbe2275340622a651';
+                const stromglassKey = '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006';
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
 
                 let data;
                 try {
-                    const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${spot.lat}&lon=${spot.lon}&key=${weatherbitKey}&include=minutely`;
-                    const response = await fetch(weatherbitUrl, { signal: controller.signal });
-                    if (!response.ok) throw new Error(`Weatherbit Error: ${response.status}`);
-                    data = (await response.json()).data[0];
+                    const stromglassUrl = `https://api.stromglass.io/v6/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=airTemperature,windSpeed,windDirection,waveHeight,wavePeriod&source=noaa`;
+                    const stromglassResponse = await fetch(stromglassUrl, {
+                        headers: { 'Authorization': stromglassKey }
+                    });
+                    if (!stromglassResponse.ok) throw new Error(`Stromglass Error: ${stromglassResponse.status}`);
+                    data = (await stromglassResponse.json()).hours[0];
                 } catch (error) {
                     clearTimeout(timeoutId);
-                    console.error(`Weatherbit failed: ${error.message}`);
+                    console.error(`Stromglass failed: ${error.message}`);
                     throw new Error('Aucune donnée météo disponible');
                 }
                 clearTimeout(timeoutId);
 
-                const waveHeight = data.wave_height || 0.75;
-                const wavePeriod = 8;
-                const windSpeed = data.wind_spd || 4.7;
-                const windDirection = data.wind_dir || 45;
+                const waveHeight = data.waveHeight || 0.75;
+                const wavePeriod = data.wavePeriod || 8;
+                const windSpeed = data.windSpeed || 4.7;
+                const windDirection = data.windDirection || 45;
 
                 let dynamicDifficulty = spot.difficulty || 'beginner';
                 if (waveHeight >= 0.8 && dynamicDifficulty !== 'expert') dynamicDifficulty = 'intermediate';
@@ -936,7 +965,7 @@
                     windSpeed: Math.round(windSpeed * 3.6),
                     windDir: Math.round(windDirection),
                     windRelative,
-                    temp: data.temp || 28,
+                    temp: data.airTemperature || 28,
                     score: Math.round(score),
                     rating,
                     ratingText,
@@ -960,14 +989,14 @@
                 updateWeatherUI(weatherData);
             } catch (error) {
                 console.error(`Erreur météo pour ${currentRegion}:`, error);
-                document.getElementById('weatherContent').innerHTML = '<div class="loading"><p>Échec API Weatherbit, pas de données.</p></div>';
+                document.getElementById('weatherContent').innerHTML = '<div class="loading"><p>Échec API, pas de données.</p></div>';
                 document.getElementById('weatherContent').classList.add('active');
             }
         }
 
-        // Load Tides (désactivé car Weatherbit ne fournit pas les marées)
+        // Load Tides (désactivé car ni Weatherbit ni Stromglass ne fournissent les marées directement)
         async function loadTides() {
-            document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Les marées ne sont pas disponibles avec Weatherbit seul.</p></div>';
+            document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Les marées ne sont pas disponibles avec ces APIs.</p></div>';
             document.getElementById('tidesContent').classList.add('active');
         }
 
@@ -1033,7 +1062,7 @@
                 spotsContent.innerHTML = spotsHtml;
             } catch (error) {
                 console.error(`Erreur chargement spots:`, error);
-                spotsContent.innerHTML = '<div class="loading col-span-full"><p>Échec API Weatherbit, pas de données disponibles.</p></div>';
+                spotsContent.innerHTML = '<div class="loading col-span-full"><p>Échec API, pas de données disponibles.</p></div>';
             }
             document.getElementById('spotsContent').classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
