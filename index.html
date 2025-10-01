@@ -748,7 +748,7 @@
             <div id="tidesContent" class="tide-grid glass-content">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Chargement marées...</p>
+                    <p>Chargement marées via Stromglass...</p>
                 </div>
             </div>
             <div id="tidesStatus" class="text-sm text-center mt-2 opacity-70"></div>
@@ -1021,13 +1021,13 @@
                             <p class="tide-height">${tide.height.toFixed(1)}m</p>
                         </div>
                     `).join('');
-                    document.getElementById('tidesContent').innerHTML = tidesHtml || '<div class="loading"><p>Aucune donnée de marée disponible.</p></div>';
+                    document.getElementById('tidesContent').innerHTML = tidesHtml || '<div class="loading"><p>Aucune donnée de marée disponible via Stromglass.</p></div>';
                 } else {
-                    document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Échec API, pas de données de marée.</p></div>';
+                    document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Échec API Stromglass, pas de données de marée.</p></div>';
                 }
             } catch (error) {
                 console.error(`Erreur marées pour ${currentRegion}:`, error);
-                document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Échec API, pas de données de marée.</p></div>';
+                document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Échec API Stromglass, pas de données de marée.</p></div>';
             }
             document.getElementById('tidesContent').classList.add('active');
         }
