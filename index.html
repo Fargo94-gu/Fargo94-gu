@@ -748,9 +748,10 @@
             <div id="tidesContent" class="tide-grid glass-content">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Les marées ne sont pas disponibles avec Open-Meteo.</p>
+                    <p>Chargement marées...</p>
                 </div>
             </div>
+            <div id="tidesStatus" class="text-sm text-center mt-2 opacity-70"></div>
         </div>
         
         <!-- Spots -->
@@ -772,7 +773,7 @@
         
         <!-- Footer -->
         <div class="glass text-center py-2">
-            <p class="text-sm opacity-70">Powered by Open-Meteo • Données réelles</p>
+            <p class="text-sm opacity-70">Powered by Open-Meteo & Stromglass • Données réelles</p>
             <p class="text-xs opacity-60 mt-1" id="lastUpdate"></p>
         </div>
     </div>
@@ -780,6 +781,7 @@
     <script>
         // Global State
         let weatherData = {};
+        let tideData = {};
         let lastUpdate = null;
         let updateInterval;
         let currentRegion = 'dakar'; // Région par défaut
@@ -875,8 +877,52 @@
                     console.error(`Open-Meteo Tentative ${attempt} échouée: ${openMeteoError.message}`);
 
                     if (attempt === maxRetries) {
-                        document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives: ${openMeteoError.message}`;
+                        document.getElementById('weatherStatus').textContent = `Échec API Open-Meteo après ${maxRetries} tentatives: ${openMeteoError.message}`;
                         throw openMeteoError;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Délai croissant
+                }
+            }
+        }
+
+        // Fetch avec Stromglass pour les marées
+        async function fetchWithStromglass(lat, lon, region) {
+            const maxRetries = 3;
+            const stromglassKey = '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006';
+            const timeoutMs = 5000;
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                if (!checkNetwork()) {
+                    document.getElementById('tidesStatus').textContent = `Pas de connexion internet (Tentative ${attempt}/${maxRetries})`;
+                    continue;
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+                try {
+                    document.getElementById('tidesStatus').textContent = `Tentative Stromglass ${attempt}/${maxRetries} pour ${region}...`;
+                    const stromglassUrl = `https://api.stromglass.io/v6/tide/extremes?lat=${lat}&lng=${lon}&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}`;
+                    const stromglassResponse = await fetch(stromglassUrl, {
+                        headers: { 'Authorization': stromglassKey },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (!stromglassResponse.ok) {
+                        throw new Error(`Erreur Stromglass: ${stromglassResponse.status}`);
+                    }
+
+                    const stromglassData = await stromglassResponse.json();
+                    document.getElementById('tidesStatus').textContent = `Mise à jour Stromglass réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                    return stromglassData.data;
+                } catch (stromglassError) {
+                    clearTimeout(timeoutId);
+                    console.error(`Stromglass Tentative ${attempt} échouée: ${stromglassError.message}`);
+
+                    if (attempt === maxRetries) {
+                        document.getElementById('tidesStatus').textContent = `Échec API Stromglass après ${maxRetries} tentatives: ${stromglassError.message}`;
+                        return null; // Retourne null en cas d'échec
                     }
                     await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Délai croissant
                 }
@@ -960,9 +1006,29 @@
             }
         }
 
-        // Load Tides (désactivé)
+        // Load Tides
         async function loadTides() {
-            document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Les marées ne sont pas disponibles avec Open-Meteo.</p></div>';
+            const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
+            const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
+
+            try {
+                const tideData = await fetchWithStromglass(lat, lon, currentRegion);
+                if (tideData) {
+                    const tidesHtml = tideData.slice(0, 2).map(tide => `
+                        <div class="tide-card">
+                            <p class="tide-type">${tide.type === 'l' ? 'Basse' : 'Haute'} Mer</p>
+                            <p class="tide-time">${new Date(tide.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                            <p class="tide-height">${tide.height.toFixed(1)}m</p>
+                        </div>
+                    `).join('');
+                    document.getElementById('tidesContent').innerHTML = tidesHtml || '<div class="loading"><p>Aucune donnée de marée disponible.</p></div>';
+                } else {
+                    document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Échec API, pas de données de marée.</p></div>';
+                }
+            } catch (error) {
+                console.error(`Erreur marées pour ${currentRegion}:`, error);
+                document.getElementById('tidesContent').innerHTML = '<div class="loading"><p>Échec API, pas de données de marée.</p></div>';
+            }
             document.getElementById('tidesContent').classList.add('active');
         }
 
