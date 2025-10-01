@@ -835,7 +835,7 @@
     <script>
         // Clé API Weatherbit
         const WEATHERBIT_API_KEY = '5131829b18ce439fbe2275340622a651';
-        // Clé API Stormglass (réintégrée)
+        // Clé API Stormglass (pour les marées)
         const STORMGLASS_API_KEY = '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006';
 
         // Global State
@@ -889,7 +889,7 @@
             document.getElementById('themeIcon').textContent = '☀️';
         }
 
-        // --- FONCTION fetchWithFallback RÉVISÉE AVEC LES 3 APIS ---
+        // --- FONCTION fetchWithFallback RÉVISÉE AVEC OPEN-METEO EN PRIO VAGUES ---
         async function fetchWithFallback(lat, lon) {
             const now = new Date();
             const today = now.toISOString().split('T')[0];
@@ -905,7 +905,27 @@
                 wavePeriod: null
             };
 
-            // 1. TENTATIVE : Weatherbit (Météo SEULEMENT)
+            // 1. TENTATIVE : Open-Meteo pour les VAGUES (Priorité absolue pour débloquer les spots)
+            try {
+                const openmeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period&timezone=${timezone}`;
+                const response = await fetch(openmeteoUrl);
+                if (!response.ok) throw new Error(`Open-Meteo VAGUES HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                console.log('Succès Open-Meteo pour VAGUES:', data);
+
+                unifiedData.waveHeight = data.hourly.wave_height[currentHour];
+                unifiedData.wavePeriod = data.hourly.wave_period[currentHour];
+
+                if (unifiedData.waveHeight === undefined || unifiedData.wavePeriod === undefined) {
+                     throw new Error("Open-Meteo n'a pas pu fournir de données de vagues.");
+                }
+
+            } catch (error) {
+                console.error(`Erreur Open-Meteo VAGUES:`, error.message);
+            }
+            
+            // 2. TENTATIVE : Weatherbit pour la MÉTÉO (Priorité absolue pour vent/temp)
             try {
                 const weatherbitUrl = `https://api.weatherbit.io/v2.0/forecast/hourly?lat=${lat}&lon=${lon}&key=${WEATHERBIT_API_KEY}&units=M&hours=24`;
                 const response = await fetch(weatherbitUrl);
@@ -913,74 +933,57 @@
                 const data = await response.json();
                 
                 const wbitData = data.data[currentHour];
-                console.log('Succès Weatherbit pour la MÉTÉO:', wbitData);
+                console.log('Succès Weatherbit pour MÉTÉO:', wbitData);
 
                 unifiedData.airTemperature = wbitData.temp;
                 unifiedData.windSpeed = wbitData.wind_spd; // m/s
                 unifiedData.windDirection = wbitData.wind_dir; // degrés
-                
-                // Si Weatherbit réussit, nous avons la meilleure info météo. On cherche les vagues avec Stormglass ou Open-Meteo.
             } catch (error) {
                 console.error(`Erreur Weatherbit:`, error.message);
             }
 
-            // 2. TENTATIVE : Stormglass (Vagues et Météo de secours)
-            try {
-                const stormglassUrl = `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lon}&params=waveHeight,wavePeriod,windSpeed,windDirection,airTemperature&source=noaa&start=${today}&end=${today}`;
-                const response = await fetch(stormglassUrl, { headers: { 'Authorization': STORMGLASS_API_KEY } });
-                if (!response.ok) throw new Error(`Stormglass HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                
-                const sgData = data.hours[currentHour];
-                
-                console.log('Succès Stormglass pour VAGUES et MÉTÉO:', sgData);
-
-                // On écrase les champs manquants avec les données Stormglass
-                unifiedData.waveHeight = sgData.waveHeight?.noaa;
-                unifiedData.wavePeriod = sgData.wavePeriod?.noaa;
-                
-                if (!unifiedData.airTemperature) unifiedData.airTemperature = sgData.airTemperature?.noaa;
-                if (!unifiedData.windSpeed) unifiedData.windSpeed = sgData.windSpeed?.noaa;
-                if (!unifiedData.windDirection) unifiedData.windDirection = sgData.windDirection?.noaa;
-
-            } catch (error) {
-                console.error(`Erreur Stormglass:`, error.message);
-            }
-
-            // 3. TENTATIVE : Open-Meteo (Ultime recours pour Vagues et Météo)
-            try {
-                // On n'appelle Open-Meteo que si nous manquons encore de données clés (vagues ou météo).
-                if (!unifiedData.waveHeight || !unifiedData.airTemperature) {
-                    const openmeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,temperature_2m,wind_speed_10m,wind_direction_10m&timezone=${timezone}`;
-                    const response = await fetch(openmeteoUrl);
-                    if (!response.ok) throw new Error(`Open-Meteo HTTP error! status: ${response.status}`);
+            // 3. TENTATIVE : Stormglass pour compléter la MÉTÉO (Si Weatherbit a échoué)
+            if (unifiedData.airTemperature === null || unifiedData.windSpeed === null) {
+                try {
+                    const stormglassUrl = `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lon}&params=windSpeed,windDirection,airTemperature&source=noaa&start=${today}&end=${today}`;
+                    const response = await fetch(stormglassUrl, { headers: { 'Authorization': STORMGLASS_API_KEY } });
+                    if (!response.ok) throw new Error(`Stormglass MÉTÉO HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     
-                    console.log('Succès Open-Meteo (Ultime Recours):', data);
-
-                    if (!unifiedData.waveHeight) unifiedData.waveHeight = data.hourly.wave_height[currentHour];
-                    if (!unifiedData.wavePeriod) unifiedData.wavePeriod = data.hourly.wave_period[currentHour];
+                    const sgData = data.hours[currentHour];
                     
-                    // Si Weatherbit ou Stormglass ont déjà rempli les données, on ne les écrase pas
-                    if (!unifiedData.airTemperature) unifiedData.airTemperature = data.hourly.temperature_2m[currentHour];
-                    if (!unifiedData.windSpeed) unifiedData.windSpeed = data.hourly.wind_speed_10m[currentHour] / 3.6; // km/h vers m/s
-                    if (!unifiedData.windDirection) unifiedData.windDirection = data.hourly.wind_direction_10m[currentHour];
+                    console.log('Succès Stormglass pour MÉTÉO de secours:', sgData);
+
+                    if (!unifiedData.airTemperature) unifiedData.airTemperature = sgData.airTemperature?.noaa;
+                    if (!unifiedData.windSpeed) unifiedData.windSpeed = sgData.windSpeed?.noaa;
+                    if (!unifiedData.windDirection) unifiedData.windDirection = sgData.windDirection?.noaa;
+
+                } catch (error) {
+                    console.error(`Erreur Stormglass MÉTÉO:`, error.message);
                 }
-            } catch (error) {
-                console.error(`Erreur Open-Meteo:`, error.message);
             }
-            
+
+
             // Vérification finale des données essentielles
-            if (unifiedData.waveHeight === null) {
-                throw new Error("Impossible d'obtenir la hauteur des vagues à partir de toutes les sources.");
+            if (unifiedData.waveHeight === null || unifiedData.wavePeriod === null) {
+                // Si Open-Meteo a échoué pour les vagues, nous n'avons rien d'autre de fiable
+                throw new Error("Impossible d'obtenir les données de vagues (Open-Meteo a échoué).");
             }
             if (unifiedData.airTemperature === null) {
-                throw new Error("Impossible d'obtenir la température à partir de toutes les sources.");
+                // Si la température manque encore, on l'estime (pour ne pas bloquer)
+                console.warn("Température manquante, estimation utilisée.");
+                unifiedData.airTemperature = currentRegion === 'maroc' ? 20 : 30;
+            }
+            if (unifiedData.windSpeed === null) {
+                // Si le vent manque encore, on l'estime (pour ne pas bloquer)
+                console.warn("Vent manquant, estimation utilisée.");
+                unifiedData.windSpeed = 4.0; // 4 m/s (environ 14 km/h)
+                unifiedData.windDirection = 270; // West
             }
 
             return unifiedData;
         }
-        // --- FIN fetchWithFallback RÉVISÉE ---
+        // --- FIN fetchWithFallback RÉVISÉE (Vagues en prio Open-Meteo) ---
 
         // Generate Spot Conditions (mise à jour pour la structure de retour de fetchWithFallback)
         async function generateSpotConditions(spot, spotList) {
@@ -1047,7 +1050,7 @@
             }
         }
 
-        // Load Weather
+        // Load Weather (Utilise toujours fetchWithFallback)
         async function loadWeather() {
             const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
@@ -1058,7 +1061,7 @@
                 // Utilise fetchWithFallback pour obtenir les meilleures données météo
                 const data = await fetchWithFallback(lat, lon);
                 
-                // Météo et vent (provenant de Weatherbit/Stormglass/Open-Meteo)
+                // Météo et vent
                 const tempCurrent = data.airTemperature;
                 const windSpeed_ms = data.windSpeed;
                 const windDirection = data.windDirection;
@@ -1089,7 +1092,7 @@
             }
         }
 
-        // Load Tides (Utilise Stormglass qui est réintégré)
+        // Load Tides (Utilise Stormglass)
         async function loadTides() {
             const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
@@ -1118,13 +1121,12 @@
                 updateTidesUI(tideData);
             } catch (error) {
                 console.error(`Erreur marées pour ${currentRegion} (Stormglass):`, error);
-                showAlert('Erreur Marées', 'Impossible de charger les données de marées (Stormglass). Affichage de l\'estimation.', 'warning');
-                
                 // Fallback vers l'estimation si Stormglass échoue
                 const cachedData = localStorage.getItem(cacheKey);
                 if (cachedData && !JSON.parse(cachedData).isEstimated) {
                     updateTidesUI(JSON.parse(cachedData)); // Utilise l'ancien cache si non estimé
                 } else {
+                    showAlert('Erreur Marées', 'Impossible de charger les données de marées (Stormglass). Affichage de l\'estimation.', 'warning');
                     const defaultTides = {
                         highTide: { height: currentRegion === 'maroc' ? 3.5 : 2.0, time: new Date(new Date().setHours(11, 0)).toISOString() },
                         lowTide: { height: currentRegion === 'maroc' ? 1.0 : 0.5, time: new Date(new Date().setHours(17, 0)).toISOString() },
@@ -1136,7 +1138,7 @@
             }
         }
 
-        // Load Spots (inchangé dans son principe)
+        // Load Spots (inchangé)
         async function loadSpots(spotList) {
             const spotsContent = document.getElementById('spotsContent');
             spotsContent.innerHTML = '<div class="loading col-span-full"><div class="spinner"></div><p>Analyse conditions...</p></div>';
@@ -1202,7 +1204,7 @@
                                 <h3 class="spot-title">${spot.name}</h3>
                                 <span class="spot-icon">${spot.icon}</span>
                             </div>
-                            <p class="text-center text-red-400">Échec API, pas de données disponibles.</p>
+                            <p class="text-center text-red-400">Échec API, pas de données disponibles (vagues).</p>
                         </div>
                     `;
                 }
@@ -1242,7 +1244,7 @@
             document.getElementById('btnIcon').textContent = '🔄';
         }
 
-        // Fonctions utilitaires pour mise à jour UI (légère modification pour les marées)
+        // Fonctions utilitaires pour mise à jour UI (inchangées)
         function updateWeatherUI(data) {
             const windSpeed_kmh = Math.round(data.windSpeed * 3.6);
             
@@ -1287,7 +1289,7 @@
             document.getElementById('tidesContent').classList.add('active');
         }
         
-        // Fonctions Alertes (légère amélioration pour les types)
+        // Fonctions Alertes (inchangées)
         function showAlert(title, message, type = 'danger') {
             const alertBanner = document.getElementById('alertBanner');
             const alertTitle = document.getElementById('alertTitle');
@@ -1319,4 +1321,3 @@
     </script>
 </body>
 </html>
-
