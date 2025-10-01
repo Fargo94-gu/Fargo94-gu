@@ -739,6 +739,7 @@
                     <p>Chargement météo...</p>
                 </div>
             </div>
+            <div id="weatherStatus" class="text-sm text-center mt-2 opacity-70"></div>
         </div>
         
         <!-- Tides -->
@@ -831,12 +832,12 @@
         // Fetch avec uniquement Weatherbit (sans cache pour ce test)
         async function fetchWithPriority(lat, lon, params, region) {
             const now = new Date();
-            const currentHour = now.getHours();
             const dateStr = now.toISOString().split('T')[0];
             const weatherbitKey = '5131829b18ce439fbe2275340622a651';
 
             try {
                 console.log(`Tentative Weatherbit pour ${region} à ${lat}, ${lon} - Date: ${dateStr}`);
+                document.getElementById('weatherStatus').textContent = `Tentative API pour ${region}...`;
                 const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${weatherbitKey}&include=minutely`;
                 const weatherbitResponse = await fetch(weatherbitUrl);
                 if (!weatherbitResponse.ok) throw new Error(`Weatherbit Error: ${weatherbitResponse.status}`);
@@ -851,10 +852,11 @@
                     windDir
                 };
                 console.log(`Weatherbit réussi - Données: ${JSON.stringify(weatherData)}`);
-                localStorage.setItem(`weather_${region}_${dateStr}`, JSON.stringify(weatherData)); // Sauvegarde pour demain
+                document.getElementById('weatherStatus').textContent = `Mise à jour réussie à ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
                 return weatherData;
             } catch (weatherbitError) {
                 console.error(`Weatherbit failed: ${weatherbitError.message}`);
+                document.getElementById('weatherStatus').textContent = `Échec API: ${weatherbitError.message}`;
                 throw new Error('Weatherbit a échoué');
             }
         }
@@ -862,9 +864,7 @@
         // Generate Spot Conditions avec uniquement Weatherbit
         async function generateSpotConditions(spot, spotList) {
             const now = new Date();
-            const hourOffset = now.getHours();
             const spotIndex = spotList.findIndex(s => s.name === spot.name);
-            const cacheKey = `spot_${spot.name}_${currentRegion}_${now.toISOString().split('T')[0]}`;
             console.log(`Loading conditions for ${spot.name} at ${spot.lat}, ${spot.lon}`);
 
             try {
@@ -919,7 +919,6 @@
                     dynamicDifficulty,
                     waveDirection: Math.round(spotFacing + (spotIndex * 5))
                 };
-                localStorage.setItem(cacheKey, JSON.stringify(conditions));
                 return conditions;
             } catch (error) {
                 console.error(`Erreur conditions ${spot.name}:`, error);
@@ -932,17 +931,14 @@
             const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
             const now = new Date();
-            const currentHour = now.getHours();
             const dateStr = now.toISOString().split('T')[0];
-            const cacheKey = `weather_${currentRegion}_${dateStr}`;
-            console.log(`Loading weather for ${currentRegion} at ${lat}, ${lon} - Date: ${dateStr}`);
 
             try {
                 const weatherData = await fetchWithPriority(lat, lon, 'airTemperature,windSpeed,windDirection', currentRegion);
                 updateWeatherUI(weatherData);
             } catch (error) {
                 console.error(`Erreur météo pour ${currentRegion}:`, error);
-                document.getElementById('weatherContent').innerHTML = '<div class="loading"><p>Échec API Weatherbit, pas de données disponibles.</p></div>';
+                document.getElementById('weatherContent').innerHTML = '<div class="loading"><p>Échec API Weatherbit, pas de données.</p></div>';
                 document.getElementById('weatherContent').classList.add('active');
             }
         }
