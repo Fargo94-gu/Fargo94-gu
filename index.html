@@ -829,61 +829,85 @@
             document.getElementById('themeIcon').textContent = '☀️';
         }
 
-        // Fetch avec uniquement Weatherbit (sans cache pour ce test)
-        async function fetchWithPriority(lat, lon, params, region) {
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
-            const weatherbitKey = '5131829b18ce439fbe2275340622a651';
+        // Vérifier la connectivité réseau
+        function checkNetwork() {
+            return navigator.onLine;
+        }
 
-            try {
-                console.log(`Tentative Weatherbit pour ${region} à ${lat}, ${lon} - Date: ${dateStr}`);
-                document.getElementById('weatherStatus').textContent = `Tentative API pour ${region}...`;
-                const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${weatherbitKey}&include=minutely`;
-                const weatherbitResponse = await fetch(weatherbitUrl);
-                if (!weatherbitResponse.ok) throw new Error(`Weatherbit Error: ${weatherbitResponse.status}`);
-                const weatherbitData = await weatherbitResponse.json();
-                const tempCurrent = weatherbitData.data[0].temp;
-                const windSpeed = weatherbitData.data[0].wind_spd;
-                const windDir = weatherbitData.data[0].wind_dir;
-                const weatherData = {
-                    tempMin: Math.round(tempCurrent - 1),
-                    tempMax: Math.round(tempCurrent + 2),
-                    windSpeed,
-                    windDir
-                };
-                console.log(`Weatherbit réussi - Données: ${JSON.stringify(weatherData)}`);
-                document.getElementById('weatherStatus').textContent = `Mise à jour réussie à ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-                return weatherData;
-            } catch (weatherbitError) {
-                console.error(`Weatherbit failed: ${weatherbitError.message}`);
-                document.getElementById('weatherStatus').textContent = `Échec API: ${weatherbitError.message}`;
-                throw new Error('Weatherbit a échoué');
+        // Fetch avec retry et timeout
+        async function fetchWithPriority(lat, lon, params, region) {
+            const maxRetries = 3;
+            const weatherbitKey = '5131829b18ce439fbe2275340622a651';
+            const timeoutMs = 5000; // 5 secondes
+
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                if (!checkNetwork()) {
+                    document.getElementById('weatherStatus').textContent = `Pas de connexion internet (Tentative ${attempt}/${maxRetries})`;
+                    continue;
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+                try {
+                    document.getElementById('weatherStatus').textContent = `Tentative Weatherbit ${attempt}/${maxRetries} pour ${region}...`;
+                    const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${weatherbitKey}&include=minutely`;
+                    const response = await fetch(weatherbitUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+
+                    const weatherbitData = await response.json();
+                    const tempCurrent = weatherbitData.data[0].temp;
+                    const windSpeed = weatherbitData.data[0].wind_spd;
+                    const windDir = weatherbitData.data[0].wind_dir;
+                    const weatherData = {
+                        tempMin: Math.round(tempCurrent - 1),
+                        tempMax: Math.round(tempCurrent + 2),
+                        windSpeed,
+                        windDir
+                    };
+                    document.getElementById('weatherStatus').textContent = `Mise à jour réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                    return weatherData;
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    console.error(`Tentative ${attempt} échouée: ${error.message}`);
+                    if (attempt === maxRetries) {
+                        document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives: ${error.message}`;
+                        throw error;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Attendre avant retry
+                }
             }
         }
 
         // Generate Spot Conditions avec uniquement Weatherbit
         async function generateSpotConditions(spot, spotList) {
-            const now = new Date();
             const spotIndex = spotList.findIndex(s => s.name === spot.name);
             console.log(`Loading conditions for ${spot.name} at ${spot.lat}, ${spot.lon}`);
 
             try {
                 const weatherbitKey = '5131829b18ce439fbe2275340622a651';
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
 
                 let data;
                 try {
-                    console.log(`Tentative Weatherbit pour ${spot.name}`);
                     const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${spot.lat}&lon=${spot.lon}&key=${weatherbitKey}&include=minutely`;
-                    const weatherbitResponse = await fetch(weatherbitUrl);
-                    if (!weatherbitResponse.ok) throw new Error(`Weatherbit Error: ${weatherbitResponse.status}`);
-                    data = (await weatherbitResponse.json()).data[0];
-                } catch (weatherbitError) {
-                    console.error(`Weatherbit failed: ${weatherbitError.message}`);
+                    const response = await fetch(weatherbitUrl, { signal: controller.signal });
+                    if (!response.ok) throw new Error(`Weatherbit Error: ${response.status}`);
+                    data = (await response.json()).data[0];
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    console.error(`Weatherbit failed: ${error.message}`);
                     throw new Error('Aucune donnée météo disponible');
                 }
+                clearTimeout(timeoutId);
 
-                const waveHeight = data.wave_height || 0.75; // Valeur par défaut si non disponible
-                const wavePeriod = 8; // Valeur par défaut
+                const waveHeight = data.wave_height || 0.75;
+                const wavePeriod = 8;
                 const windSpeed = data.wind_spd || 4.7;
                 const windDirection = data.wind_dir || 45;
 
@@ -930,8 +954,6 @@
         async function loadWeather() {
             const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
-            const now = new Date();
-            const dateStr = now.toISOString().split('T')[0];
 
             try {
                 const weatherData = await fetchWithPriority(lat, lon, 'airTemperature,windSpeed,windDirection', currentRegion);
