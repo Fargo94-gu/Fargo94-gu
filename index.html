@@ -1,3 +1,19 @@
+C'est une excellente observation qui nous permet de diagnostiquer précisément le problème.
+Voici ce que nous avons appris de ce dernier test :
+ * Marées (loadTides) : Les données des marées étaient gérées précédemment par Stormglass. Open-Meteo et Weatherbit ne fournissant pas de données de marées publiques, j'ai mis des valeurs par défaut dans la dernière version. Le fait que vous ayez vu les données de marées dans la version précédente confirme que Stormglass fonctionnait pour les marées.
+ * Spots (Vagues et Météo) : La fonction generateSpotConditions a besoin de la hauteur des vagues (waveHeight) et de la période des vagues (wavePeriod).
+   * Open-Meteo fournit ces données (dans la version précédente, c'était le fallback).
+   * Weatherbit (votre nouvelle clé) fournit la température et le vent, mais pas les vagues dans l'API gratuite/standard.
+   * Stormglass fournissait ces données de vagues (quand il fonctionnait).
+Conclusion :
+Si les spots ne s'affichent pas dans la dernière version (Weatherbit + Open-Meteo), cela signifie qu'il y a un problème de compatibilité ou d'accès avec les données de vagues d'Open-Meteo lorsqu'elles sont utilisées pour les spots, ou que le code Open-Meteo est le seul à fonctionner et qu'il est écrasé par l'échec de Weatherbit.
+Pour avoir les données des spots, nous avons besoin d'une source de données de vagues fiable.
+Puisque nous avons confirmé que Stormglass fonctionnait pour les marées (il est donc au moins partiellement fonctionnel), il est très probable que Stormglass était également la seule API fournissant correctement les données de vagues pour les spots.
+Action recommandée :
+Nous allons remettre Stormglass en tant que source de données de vagues et de météo de secours, tout en gardant Weatherbit en première priorité pour la météo, et Open-Meteo en ultime recours.
+Je vais remettre Stormglass en priorité pour les données de vagues dans generateSpotConditions, car il a déjà prouvé son efficacité pour ce type de données.
+Code HTML/JavaScript avec Stormglass réintégré
+Voici le code mis à jour. J'ai réintégré la clé et les appels de Stormglass pour qu'il gère les vagues et les marées si Weatherbit échoue.
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -827,7 +843,7 @@
         </button>
         
         <div class="glass text-center py-2">
-            <p class="text-sm opacity-70">Powered by Weatherbit & Open-Meteo • Données réelles</p>
+            <p class="text-sm opacity-70">Powered by Weatherbit, Storm Glass & Open-Meteo • Données réelles</p>
             <p class="text-xs opacity-60 mt-1" id="lastUpdate"></p>
         </div>
     </div>
@@ -835,7 +851,8 @@
     <script>
         // Clé API Weatherbit
         const WEATHERBIT_API_KEY = '5131829b18ce439fbe2275340622a651';
-        // Note: Stormglass API key a été supprimée
+        // Clé API Stormglass (réintégrée)
+        const STORMGLASS_API_KEY = '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006';
 
         // Global State
         let weatherData = {};
@@ -888,13 +905,23 @@
             document.getElementById('themeIcon').textContent = '☀️';
         }
 
-        // --- FONCTION fetchWithFallback SANS STORMGLASS ---
-        async function fetchWithFallback(lat, lon, params) {
+        // --- FONCTION fetchWithFallback RÉVISÉE AVEC LES 3 APIS ---
+        async function fetchWithFallback(lat, lon) {
             const now = new Date();
+            const today = now.toISOString().split('T')[0];
             const currentHour = now.getHours();
             const timezone = currentRegion === 'maroc' ? 'Africa/Casablanca' : 'Africa/Dakar';
 
-            // 1. TENTATIVE : Weatherbit (Météo uniquement, car pas de vagues dans l'API gratuite/standard)
+            // Structure de données unifiée pour le retour
+            let unifiedData = {
+                airTemperature: null,
+                windSpeed: null,
+                windDirection: null,
+                waveHeight: null,
+                wavePeriod: null
+            };
+
+            // 1. TENTATIVE : Weatherbit (Météo SEULEMENT)
             try {
                 const weatherbitUrl = `https://api.weatherbit.io/v2.0/forecast/hourly?lat=${lat}&lon=${lon}&key=${WEATHERBIT_API_KEY}&units=M&hours=24`;
                 const response = await fetch(weatherbitUrl);
@@ -902,76 +929,92 @@
                 const data = await response.json();
                 
                 const wbitData = data.data[currentHour];
+                console.log('Succès Weatherbit pour la MÉTÉO:', wbitData);
 
-                console.log('Succès Weatherbit pour la météo:', wbitData);
-
-                // On retourne une structure unifiée avec les données de Weatherbit et les champs 'vagues' à null
-                const unifiedData = {
-                    airTemperature: wbitData.temp,
-                    windSpeed: wbitData.wind_spd, // m/s
-                    windDirection: wbitData.wind_dir, // degrés
-
-                    // Vagues (non supportées par l'API gratuite/standard de Weatherbit)
-                    waveHeight: null,
-                    wavePeriod: null
-                };
-
-                return unifiedData;
+                unifiedData.airTemperature = wbitData.temp;
+                unifiedData.windSpeed = wbitData.wind_spd; // m/s
+                unifiedData.windDirection = wbitData.wind_dir; // degrés
+                
+                // Si Weatherbit réussit, nous avons la meilleure info météo. On cherche les vagues avec Stormglass ou Open-Meteo.
             } catch (error) {
                 console.error(`Erreur Weatherbit:`, error.message);
-                // On ne lève pas l'erreur, on passe au fallback
             }
 
-            // 2. TENTATIVE : Open-Meteo (Météo ET Vagues de repli)
+            // 2. TENTATIVE : Stormglass (Vagues et Météo de secours)
             try {
-                // Open-Meteo fournit une bonne source pour la température, le vent ET les vagues.
-                const openmeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,temperature_2m,wind_speed_10m,wind_direction_10m&timezone=${timezone}`;
-                const response = await fetch(openmeteoUrl);
-                if (!response.ok) throw new Error(`Open-Meteo HTTP error! status: ${response.status}`);
+                const stormglassUrl = `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lon}&params=waveHeight,wavePeriod,windSpeed,windDirection,airTemperature&source=noaa&start=${today}&end=${today}`;
+                const response = await fetch(stormglassUrl, { headers: { 'Authorization': STORMGLASS_API_KEY } });
+                if (!response.ok) throw new Error(`Stormglass HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
-                const omData = {
-                    waveHeight: data.hourly.wave_height[currentHour],
-                    wavePeriod: data.hourly.wave_period[currentHour],
-                    airTemperature: data.hourly.temperature_2m[currentHour],
-                    windSpeed: data.hourly.wind_speed_10m[currentHour] / 3.6, // Open-Meteo donne en km/h, on convertit en m/s
-                    windDirection: data.hourly.wind_direction_10m[currentHour]
-                };
+                const sgData = data.hours[currentHour];
+                
+                console.log('Succès Stormglass pour VAGUES et MÉTÉO:', sgData);
 
-                console.log('Succès Open-Meteo (Fallback):', omData);
+                // On écrase les champs manquants avec les données Stormglass
+                unifiedData.waveHeight = sgData.waveHeight?.noaa;
+                unifiedData.wavePeriod = sgData.wavePeriod?.noaa;
+                
+                if (!unifiedData.airTemperature) unifiedData.airTemperature = sgData.airTemperature?.noaa;
+                if (!unifiedData.windSpeed) unifiedData.windSpeed = sgData.windSpeed?.noaa;
+                if (!unifiedData.windDirection) unifiedData.windDirection = sgData.windDirection?.noaa;
 
-                // Structure de données unifiée Open-Meteo
-                return omData;
+            } catch (error) {
+                console.error(`Erreur Stormglass:`, error.message);
+            }
+
+            // 3. TENTATIVE : Open-Meteo (Ultime recours pour Vagues et Météo)
+            try {
+                // On n'appelle Open-Meteo que si nous manquons encore de données clés (vagues ou météo).
+                if (!unifiedData.waveHeight || !unifiedData.airTemperature) {
+                    const openmeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,temperature_2m,wind_speed_10m,wind_direction_10m&timezone=${timezone}`;
+                    const response = await fetch(openmeteoUrl);
+                    if (!response.ok) throw new Error(`Open-Meteo HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    
+                    console.log('Succès Open-Meteo (Ultime Recours):', data);
+
+                    if (!unifiedData.waveHeight) unifiedData.waveHeight = data.hourly.wave_height[currentHour];
+                    if (!unifiedData.wavePeriod) unifiedData.wavePeriod = data.hourly.wave_period[currentHour];
+                    
+                    // Si Weatherbit ou Stormglass ont déjà rempli les données, on ne les écrase pas
+                    if (!unifiedData.airTemperature) unifiedData.airTemperature = data.hourly.temperature_2m[currentHour];
+                    if (!unifiedData.windSpeed) unifiedData.windSpeed = data.hourly.wind_speed_10m[currentHour] / 3.6; // km/h vers m/s
+                    if (!unifiedData.windDirection) unifiedData.windDirection = data.hourly.wind_direction_10m[currentHour];
+                }
             } catch (error) {
                 console.error(`Erreur Open-Meteo:`, error.message);
             }
+            
+            // Vérification finale des données essentielles
+            if (unifiedData.waveHeight === null) {
+                throw new Error("Impossible d'obtenir la hauteur des vagues à partir de toutes les sources.");
+            }
+            if (unifiedData.airTemperature === null) {
+                throw new Error("Impossible d'obtenir la température à partir de toutes les sources.");
+            }
 
-            throw new Error("Toutes les API ont échoué.");
+            return unifiedData;
         }
-        // --- FIN fetchWithFallback MODIFIÉE ---
+        // --- FIN fetchWithFallback RÉVISÉE ---
 
-        // Generate Spot Conditions
+        // Generate Spot Conditions (mise à jour pour la structure de retour de fetchWithFallback)
         async function generateSpotConditions(spot, spotList) {
             const now = new Date();
             const cacheKey = `spot_${spot.name}_${currentRegion}_${now.toISOString().split('T')[0]}`;
 
             try {
-                const data = await fetchWithFallback(spot.lat, spot.lon, 'all');
+                // La fonction appelle fetchWithFallback qui retourne les meilleures données disponibles.
+                const data = await fetchWithFallback(spot.lat, spot.lon);
 
-                // L'extraction est simplifiée car Weatherbit est prioritaire pour la météo, 
-                // et Open-Meteo est le seul pour les vagues si Weatherbit est utilisé.
-                
-                // Météo (Weatherbit si disponible, sinon Open-Meteo)
-                const temp = Math.round(data.airTemperature || data.airTemperature);
-                const windSpeed_ms = data.windSpeed || data.windSpeed;
-                const windDirection = data.windDirection || data.windDirection;
-                
-                // Vagues (Open-Meteo, car Weatherbit ne les fournit pas)
-                // Si Weatherbit a réussi mais pas Open-Meteo, on utilise des valeurs par défaut pour les vagues.
-                const waveHeight = data.waveHeight || 0.75; 
-                const wavePeriod = data.wavePeriod || 8; 
+                // L'extraction est directe
+                const waveHeight = data.waveHeight;
+                const wavePeriod = data.wavePeriod;
+                const windSpeed_ms = data.windSpeed; 
+                const windDirection = data.windDirection;
+                const temp = data.airTemperature;
 
-                // Conversion de la vitesse du vent en km/h pour l'affichage
+                // --- Logique d'évaluation et de formatage (inchangée) ---
                 const windSpeed_kmh = Math.round(windSpeed_ms * 3.6);
 
 
@@ -1000,7 +1043,7 @@
                     windSpeed: windSpeed_kmh,
                     windDir: Math.round(windDirection),
                     windRelative,
-                    temp: temp,
+                    temp: Math.round(temp),
                     score: Math.round(score),
                     rating,
                     ratingText,
@@ -1011,7 +1054,7 @@
                 return conditions;
             } catch (error) {
                 console.error(`Erreur conditions ${spot.name}:`, error);
-                showAlert('Erreur de données', `Impossible de charger les conditions pour ${spot.name}.`, 'danger');
+                showAlert('Erreur de données', `Impossible de charger les conditions pour ${spot.name}. Cause: ${error.message}`, 'danger');
                 const cachedData = localStorage.getItem(cacheKey);
                 if (cachedData) {
                     return JSON.parse(cachedData);
@@ -1028,12 +1071,13 @@
             const cacheKey = `weather_${currentRegion}_${now.toISOString().split('T')[0]}`;
 
             try {
-                const data = await fetchWithFallback(lat, lon, 'airTemperature,windSpeed,windDirection');
+                // Utilise fetchWithFallback pour obtenir les meilleures données météo
+                const data = await fetchWithFallback(lat, lon);
                 
-                // Température et vent (Weatherbit si OK, sinon Open-Meteo)
-                const tempCurrent = data.airTemperature || 28;
-                const windSpeed_ms = data.windSpeed || 4.7;
-                const windDirection = data.windDirection || 0;
+                // Météo et vent (provenant de Weatherbit/Stormglass/Open-Meteo)
+                const tempCurrent = data.airTemperature;
+                const windSpeed_ms = data.windSpeed;
+                const windDirection = data.windDirection;
                 
                 const tempMin = Math.round(Math.max(tempCurrent - 2, currentRegion === 'maroc' ? 15 : 25));
                 const tempMax = Math.round(Math.min(tempCurrent + 3, currentRegion === 'maroc' ? 30 : 35));
@@ -1061,24 +1105,54 @@
             }
         }
 
-        // Load Tides (Laisser une estimation puisque les deux API restantes ne fournissent pas de marées fiables)
+        // Load Tides (Utilise Stormglass qui est réintégré)
         async function loadTides() {
+            const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
+            const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
             const now = new Date();
+            const start = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+            const end = new Date(now.setHours(23, 59, 59, 999)).toISOString();
             const cacheKey = `tides_${currentRegion}_${now.toISOString().split('T')[0]}`;
+            
+            document.getElementById('tidesContent').innerHTML = '<div class="loading"><div class="spinner"></div><p>Calcul marées...</p></div>';
 
-            // Aucune des deux API restantes (Weatherbit, Open-Meteo) ne fournit des données de marées publiques.
-            // On utilise des valeurs par défaut pour l'affichage.
-            
-            const defaultTides = {
-                highTide: { height: currentRegion === 'maroc' ? 3.5 : 2.0, time: new Date(new Date().setHours(11, 0)).toISOString() },
-                lowTide: { height: currentRegion === 'maroc' ? 1.0 : 0.5, time: new Date(new Date().setHours(17, 0)).toISOString() }
-            };
-            
-            localStorage.setItem(cacheKey, JSON.stringify(defaultTides));
-            updateTidesUI(defaultTides);
+            try {
+                // Stormglass est la meilleure source pour les marées
+                const response = await fetch(`https://api.stormglass.io/v2/tide/extremes/point?lat=${lat}&lng=${lon}&start=${start}&end=${end}`, {
+                    headers: { 'Authorization': STORMGLASS_API_KEY }
+                });
+                if (!response.ok) throw new Error(`Stormglass HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                const highTide = data.data.find(t => t.type === 'high') || null;
+                const lowTide = data.data.find(t => t.type === 'low') || null;
+                
+                if (!highTide || !lowTide) throw new Error("Marées non trouvées pour aujourd'hui.");
+
+                const tideData = { highTide, lowTide, isEstimated: false };
+                localStorage.setItem(cacheKey, JSON.stringify(tideData));
+                updateTidesUI(tideData);
+            } catch (error) {
+                console.error(`Erreur marées pour ${currentRegion} (Stormglass):`, error);
+                showAlert('Erreur Marées', 'Impossible de charger les données de marées (Stormglass). Affichage de l\'estimation.', 'warning');
+                
+                // Fallback vers l'estimation si Stormglass échoue
+                const cachedData = localStorage.getItem(cacheKey);
+                if (cachedData && !JSON.parse(cachedData).isEstimated) {
+                    updateTidesUI(JSON.parse(cachedData)); // Utilise l'ancien cache si non estimé
+                } else {
+                    const defaultTides = {
+                        highTide: { height: currentRegion === 'maroc' ? 3.5 : 2.0, time: new Date(new Date().setHours(11, 0)).toISOString() },
+                        lowTide: { height: currentRegion === 'maroc' ? 1.0 : 0.5, time: new Date(new Date().setHours(17, 0)).toISOString() },
+                        isEstimated: true
+                    };
+                    updateTidesUI(defaultTides);
+                }
+                document.getElementById('tidesContent').classList.add('active');
+            }
         }
 
-        // Load Spots
+        // Load Spots (inchangé dans son principe)
         async function loadSpots(spotList) {
             const spotsContent = document.getElementById('spotsContent');
             spotsContent.innerHTML = '<div class="loading col-span-full"><div class="spinner"></div><p>Analyse conditions...</p></div>';
@@ -1154,7 +1228,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Load All Data
+        // Load All Data (inchangé)
         async function loadData(region) {
             currentRegion = region;
             document.getElementById('refreshBtn').disabled = true;
@@ -1174,7 +1248,7 @@
             // Lancer les chargements en parallèle
             await Promise.all([
                 loadWeather(),
-                loadTides(), // Utilise des valeurs par défaut maintenant
+                loadTides(),
                 loadSpots(currentRegion === 'maroc' ? spotsMaroc : spotsDakar)
             ]);
             
@@ -1184,7 +1258,7 @@
             document.getElementById('btnIcon').textContent = '🔄';
         }
 
-        // Fonctions utilitaires pour mise à jour UI (inchangées)
+        // Fonctions utilitaires pour mise à jour UI (légère modification pour les marées)
         function updateWeatherUI(data) {
             const windSpeed_kmh = Math.round(data.windSpeed * 3.6);
             
@@ -1210,24 +1284,26 @@
         }
 
         function updateTidesUI(data) {
+            const estimationTag = data.isEstimated ? 'Donnée estimée' : 'Donnée réelle';
+
             document.getElementById('tidesContent').innerHTML = `
                 <div class="tide-card">
                     <div class="tide-type text-blue-400">Haute</div>
                     <div class="tide-time">${new Date(data.highTide.time).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>
                     <div class="tide-height">${data.highTide.height.toFixed(1)}m</div>
-                    <p class="text-sm text-white opacity-80 mt-1">Donnée estimée</p>
+                    <p class="text-sm text-white opacity-80 mt-1">${estimationTag}</p>
                 </div>
                 <div class="tide-card">
                     <div class="tide-type text-red-400">Basse</div>
                     <div class="tide-time">${new Date(data.lowTide.time).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>
                     <div class="tide-height">${data.lowTide.height.toFixed(1)}m</div>
-                    <p class="text-sm text-white opacity-80 mt-1">Donnée estimée</p>
+                    <p class="text-sm text-white opacity-80 mt-1">${estimationTag}</p>
                 </div>
             `;
             document.getElementById('tidesContent').classList.add('active');
         }
         
-        // Fonctions Alertes (inchangées)
+        // Fonctions Alertes (légère amélioration pour les types)
         function showAlert(title, message, type = 'danger') {
             const alertBanner = document.getElementById('alertBanner');
             const alertTitle = document.getElementById('alertTitle');
@@ -1239,6 +1315,8 @@
             alertBanner.style.background = ''; 
             if (type === 'danger') {
                  alertBanner.style.background = 'linear-gradient(135deg, #ef4444, #f59e0b)';
+            } else if (type === 'warning') {
+                alertBanner.style.background = 'linear-gradient(135deg, #f59e0b, #facc15)';
             }
 
             alertBanner.classList.remove('hidden');
@@ -1257,3 +1335,4 @@
     </script>
 </body>
 </html>
+
