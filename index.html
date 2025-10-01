@@ -772,7 +772,7 @@
         
         <!-- Footer -->
         <div class="glass text-center py-2">
-            <p class="text-sm opacity-70">Powered by Weatherbit, Stromglass & Open-Meteo • Données réelles</p>
+            <p class="text-sm opacity-70">Powered by Stromglass & Open-Meteo • Données réelles</p>
             <p class="text-xs opacity-60 mt-1" id="lastUpdate"></p>
         </div>
     </div>
@@ -834,10 +834,9 @@
             return navigator.onLine;
         }
 
-        // Fetch avec Weatherbit, Stromglass et Open-Meteo
+        // Fetch avec Stromglass et Open-Meteo
         async function fetchWithPriority(lat, lon, params, region) {
             const maxRetries = 3;
-            const weatherbitKey = '5131829b18ce439fbe2275340622a651';
             const stromglassKey = '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006';
             const timeoutMs = 5000;
 
@@ -851,81 +850,57 @@
                 const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
                 try {
-                    // Tentative Weatherbit
-                    document.getElementById('weatherStatus').textContent = `Tentative Weatherbit ${attempt}/${maxRetries} pour ${region}...`;
-                    const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${weatherbitKey}&include=minutely`;
-                    const weatherbitResponse = await fetch(weatherbitUrl, { signal: controller.signal });
+                    // Tentative Stromglass (priorité pour vagues)
+                    document.getElementById('weatherStatus').textContent = `Tentative Stromglass ${attempt}/${maxRetries} pour ${region}...`;
+                    const stromglassUrl = `https://api.stromglass.io/v6/weather/point?lat=${lat}&lng=${lon}&params=${params}&source=noaa`;
+                    const stromglassResponse = await fetch(stromglassUrl, {
+                        headers: { 'Authorization': stromglassKey },
+                        signal: controller.signal
+                    });
                     clearTimeout(timeoutId);
 
-                    if (!weatherbitResponse.ok) {
-                        throw new Error(`Erreur Weatherbit: ${weatherbitResponse.status}`);
+                    if (!stromglassResponse.ok) {
+                        throw new Error(`Erreur Stromglass: ${stromglassResponse.status}`);
                     }
 
-                    const weatherbitData = await weatherbitResponse.json();
-                    const tempCurrent = weatherbitData.data[0].temp;
-                    const windSpeed = weatherbitData.data[0].wind_spd;
-                    const windDir = weatherbitData.data[0].wind_dir;
+                    const stromglassData = await stromglassResponse.json();
+                    const latestData = stromglassData.hours[0];
                     const weatherData = {
-                        tempMin: Math.round(tempCurrent - 1),
-                        tempMax: Math.round(tempCurrent + 2),
-                        windSpeed,
-                        windDir
+                        tempMin: Math.round(latestData.airTemperature - 1),
+                        tempMax: Math.round(latestData.airTemperature + 2),
+                        windSpeed: latestData.windSpeed,
+                        windDir: latestData.windDirection
                     };
-                    document.getElementById('weatherStatus').textContent = `Mise à jour Weatherbit réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                    document.getElementById('weatherStatus').textContent = `Mise à jour Stromglass réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
                     return weatherData;
-                } catch (weatherbitError) {
+                } catch (stromglassError) {
                     clearTimeout(timeoutId);
-                    console.error(`Weatherbit Tentative ${attempt} échouée: ${weatherbitError.message}`);
+                    console.error(`Stromglass Tentative ${attempt} échouée: ${stromglassError.message}`);
 
                     if (attempt === maxRetries) {
-                        // Tentative Stromglass
+                        // Fallback Open-Meteo
                         try {
-                            document.getElementById('weatherStatus').textContent = `Tentative Stromglass pour ${region}...`;
-                            const stromglassUrl = `https://api.stromglass.io/v6/weather/point?lat=${lat}&lng=${lon}&params=${params}&source=noaa`;
-                            const stromglassResponse = await fetch(stromglassUrl, {
-                                headers: { 'Authorization': stromglassKey }
-                            });
-                            if (!stromglassResponse.ok) {
-                                throw new Error(`Erreur Stromglass: ${stromglassResponse.status}`);
+                            document.getElementById('weatherStatus').textContent = `Tentative Open-Meteo pour ${region}...`;
+                            const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                            const openMeteoResponse = await fetch(openMeteoUrl, { signal: controller.signal });
+                            if (!openMeteoResponse.ok) {
+                                throw new Error(`Erreur Open-Meteo: ${openMeteoResponse.status}`);
                             }
 
-                            const stromglassData = await stromglassResponse.json();
-                            const latestData = stromglassData.hours[0];
+                            const openMeteoData = await openMeteoResponse.json();
+                            const currentWeather = openMeteoData.current_weather;
                             const weatherData = {
-                                tempMin: Math.round(latestData.airTemperature - 1),
-                                tempMax: Math.round(latestData.airTemperature + 2),
-                                windSpeed: latestData.windSpeed,
-                                windDir: latestData.windDirection
+                                tempMin: Math.round(currentWeather.temperature - 1),
+                                tempMax: Math.round(currentWeather.temperature + 2),
+                                windSpeed: currentWeather.windspeed,
+                                windDir: currentWeather.winddirection
                             };
-                            document.getElementById('weatherStatus').textContent = `Mise à jour Stromglass réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                            document.getElementById('weatherStatus').textContent = `Mise à jour Open-Meteo réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
                             return weatherData;
-                        } catch (stromglassError) {
-                            console.error(`Stromglass échoué: ${stromglassError.message}`);
-
-                            // Fallback Open-Meteo
-                            try {
-                                document.getElementById('weatherStatus').textContent = `Tentative Open-Meteo pour ${region}...`;
-                                const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-                                const openMeteoResponse = await fetch(openMeteoUrl, { signal: controller.signal });
-                                if (!openMeteoResponse.ok) {
-                                    throw new Error(`Erreur Open-Meteo: ${openMeteoResponse.status}`);
-                                }
-
-                                const openMeteoData = await openMeteoResponse.json();
-                                const currentWeather = openMeteoData.current_weather;
-                                const weatherData = {
-                                    tempMin: Math.round(currentWeather.temperature - 1),
-                                    tempMax: Math.round(currentWeather.temperature + 2),
-                                    windSpeed: currentWeather.windspeed,
-                                    windDir: currentWeather.winddirection
-                                };
-                                document.getElementById('weatherStatus').textContent = `Mise à jour Open-Meteo réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-                                return weatherData;
-                            } catch (openMeteoError) {
-                                console.error(`Open-Meteo échoué: ${openMeteoError.message}`);
-                                document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives: ${openMeteoError.message}`;
-                                throw openMeteoError;
-                            }
+                        } catch (openMeteoError) {
+                            console.error(`Open-Meteo échoué: ${openMeteoError.message}`);
+                            document.getElementById('weatherStatus').textContent = `Échec API après ${maxRetries} tentatives: ${openMeteoError.message}`;
+                            throw openMeteoError;
                         }
                     }
                     await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Délai croissant
@@ -1015,7 +990,7 @@
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
 
             try {
-                const weatherData = await fetchWithPriority(lat, lon, 'airTemperature,windSpeed,windDirection', currentRegion);
+                const weatherData = await fetchWithPriority(lat, lon, 'airTemperature,windSpeed,windDirection,waveHeight,wavePeriod', currentRegion);
                 updateWeatherUI(weatherData);
             } catch (error) {
                 console.error(`Erreur météo pour ${currentRegion}:`, error);
@@ -1106,7 +1081,9 @@
 
             try {
                 await loadWeather();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Délai pour éviter surcharge
                 await loadTides();
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Délai
                 await loadSpots(currentRegion === 'dakar' ? spotsDakar : spotsMaroc);
                 lastUpdate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                 document.getElementById('lastUpdate').textContent = `Dernière mise à jour: ${lastUpdate}`;
