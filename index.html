@@ -889,7 +889,7 @@
             document.getElementById('themeIcon').textContent = '☀️';
         }
 
-        // --- FONCTION fetchWithFallback RÉVISÉE AVEC OPEN-METEO EN PRIO VAGUES ---
+        // --- FONCTION fetchWithFallback RÉVISÉE (Open-Meteo Vagues, Weatherbit Météo) ---
         async function fetchWithFallback(lat, lon) {
             const now = new Date();
             const today = now.toISOString().split('T')[0];
@@ -970,22 +970,22 @@
                 throw new Error("Impossible d'obtenir les données de vagues (Open-Meteo a échoué).");
             }
             if (unifiedData.airTemperature === null) {
-                // Si la température manque encore, on l'estime (pour ne pas bloquer)
-                console.warn("Température manquante, estimation utilisée.");
+                // Si la température manque encore, on lance une alerte mais on ne bloque pas le spot
+                showAlert('Météo Manquante', 'Température non disponible. Estimation utilisée (Ne bloque pas les spots).', 'warning');
                 unifiedData.airTemperature = currentRegion === 'maroc' ? 20 : 30;
             }
             if (unifiedData.windSpeed === null) {
-                // Si le vent manque encore, on l'estime (pour ne pas bloquer)
-                console.warn("Vent manquant, estimation utilisée.");
+                // Si le vent manque encore, on lance une alerte mais on ne bloque pas le spot
+                showAlert('Météo Manquante', 'Vent non disponible. Estimation utilisée (Ne bloque pas les spots).', 'warning');
                 unifiedData.windSpeed = 4.0; // 4 m/s (environ 14 km/h)
                 unifiedData.windDirection = 270; // West
             }
 
             return unifiedData;
         }
-        // --- FIN fetchWithFallback RÉVISÉE (Vagues en prio Open-Meteo) ---
+        // --- FIN fetchWithFallback RÉVISÉE ---
 
-        // Generate Spot Conditions (mise à jour pour la structure de retour de fetchWithFallback)
+        // Generate Spot Conditions (inchangé)
         async function generateSpotConditions(spot, spotList) {
             const now = new Date();
             const cacheKey = `spot_${spot.name}_${currentRegion}_${now.toISOString().split('T')[0]}`;
@@ -1050,7 +1050,7 @@
             }
         }
 
-        // Load Weather (Utilise toujours fetchWithFallback)
+        // Load Weather (inchangé)
         async function loadWeather() {
             const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
@@ -1092,7 +1092,7 @@
             }
         }
 
-        // Load Tides (Utilise Stormglass)
+        // Load Tides (mise à jour pour supprimer l'estimation statique)
         async function loadTides() {
             const lat = currentRegion === 'maroc' ? 30.138 : 14.6937;
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
@@ -1116,23 +1116,20 @@
                 
                 if (!highTide || !lowTide) throw new Error("Marées non trouvées pour aujourd'hui.");
 
+                // isEstimated est toujours false car les données viennent de Stormglass
                 const tideData = { highTide, lowTide, isEstimated: false };
                 localStorage.setItem(cacheKey, JSON.stringify(tideData));
                 updateTidesUI(tideData);
             } catch (error) {
                 console.error(`Erreur marées pour ${currentRegion} (Stormglass):`, error);
-                // Fallback vers l'estimation si Stormglass échoue
+                
+                // Fallback vers le cache ou un message d'erreur
                 const cachedData = localStorage.getItem(cacheKey);
-                if (cachedData && !JSON.parse(cachedData).isEstimated) {
-                    updateTidesUI(JSON.parse(cachedData)); // Utilise l'ancien cache si non estimé
+                if (cachedData) {
+                    updateTidesUI(JSON.parse(cachedData)); // Affiche le cache
                 } else {
-                    showAlert('Erreur Marées', 'Impossible de charger les données de marées (Stormglass). Affichage de l\'estimation.', 'warning');
-                    const defaultTides = {
-                        highTide: { height: currentRegion === 'maroc' ? 3.5 : 2.0, time: new Date(new Date().setHours(11, 0)).toISOString() },
-                        lowTide: { height: currentRegion === 'maroc' ? 1.0 : 0.5, time: new Date(new Date().setHours(17, 0)).toISOString() },
-                        isEstimated: true
-                    };
-                    updateTidesUI(defaultTides);
+                    showAlert('Erreur Marées', 'Impossible de charger les données de marées (Stormglass).', 'danger');
+                    document.getElementById('tidesContent').innerHTML = '<p class="text-center text-red-400">Marées indisponibles.</p>';
                 }
                 document.getElementById('tidesContent').classList.add('active');
             }
@@ -1204,7 +1201,7 @@
                                 <h3 class="spot-title">${spot.name}</h3>
                                 <span class="spot-icon">${spot.icon}</span>
                             </div>
-                            <p class="text-center text-red-400">Échec API, pas de données disponibles (vagues).</p>
+                            <p class="text-center text-red-400">Échec API, pas de données de vagues disponibles.</p>
                         </div>
                     `;
                 }
