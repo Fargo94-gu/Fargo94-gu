@@ -828,16 +828,15 @@
             document.getElementById('themeIcon').textContent = '☀️';
         }
 
-        // Fetch avec uniquement Weatherbit
+        // Fetch avec uniquement Weatherbit (sans cache pour ce test)
         async function fetchWithPriority(lat, lon, params, region) {
             const now = new Date();
             const currentHour = now.getHours();
             const dateStr = now.toISOString().split('T')[0];
             const weatherbitKey = '5131829b18ce439fbe2275340622a651';
 
-            // Weatherbit (seule API active)
             try {
-                console.log(`Tentative Weatherbit pour ${region} à ${lat}, ${lon}`);
+                console.log(`Tentative Weatherbit pour ${region} à ${lat}, ${lon} - Date: ${dateStr}`);
                 const weatherbitUrl = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${weatherbitKey}&include=minutely`;
                 const weatherbitResponse = await fetch(weatherbitUrl);
                 if (!weatherbitResponse.ok) throw new Error(`Weatherbit Error: ${weatherbitResponse.status}`);
@@ -845,13 +844,18 @@
                 const tempCurrent = weatherbitData.data[0].temp;
                 const windSpeed = weatherbitData.data[0].wind_spd;
                 const windDir = weatherbitData.data[0].wind_dir;
-                const weatherData = { tempMin: Math.round(tempCurrent - 1), tempMax: Math.round(tempCurrent + 2), windSpeed, windDir };
-                console.log(`Weatherbit réussi: ${JSON.stringify(weatherData)}`);
-                localStorage.setItem(`weather_${region}_${dateStr}`, JSON.stringify(weatherData));
+                const weatherData = {
+                    tempMin: Math.round(tempCurrent - 1),
+                    tempMax: Math.round(tempCurrent + 2),
+                    windSpeed,
+                    windDir
+                };
+                console.log(`Weatherbit réussi - Données: ${JSON.stringify(weatherData)}`);
+                localStorage.setItem(`weather_${region}_${dateStr}`, JSON.stringify(weatherData)); // Sauvegarde pour demain
                 return weatherData;
             } catch (weatherbitError) {
                 console.error(`Weatherbit failed: ${weatherbitError.message}`);
-                throw new Error('Weatherbit a échoué, aucune autre API disponible');
+                throw new Error('Weatherbit a échoué');
             }
         }
 
@@ -866,7 +870,6 @@
             try {
                 const weatherbitKey = '5131829b18ce439fbe2275340622a651';
 
-                // Weatherbit (seule API active)
                 let data;
                 try {
                     console.log(`Tentative Weatherbit pour ${spot.name}`);
@@ -880,7 +883,7 @@
                 }
 
                 const waveHeight = data.wave_height || 0.75; // Valeur par défaut si non disponible
-                const wavePeriod = 8; // Valeur par défaut car Weatherbit ne fournit pas toujours cela
+                const wavePeriod = 8; // Valeur par défaut
                 const windSpeed = data.wind_spd || 4.7;
                 const windDirection = data.wind_dir || 45;
 
@@ -920,13 +923,6 @@
                 return conditions;
             } catch (error) {
                 console.error(`Erreur conditions ${spot.name}:`, error);
-                const cachedData = localStorage.getItem(cacheKey);
-                if (cachedData) {
-                    const cached = JSON.parse(cachedData);
-                    const cachedDate = new Date(cached.timestamp || now).toISOString().split('T')[0];
-                    const currentDate = now.toISOString().split('T')[0];
-                    if (cachedDate === currentDate) return cached;
-                }
                 throw new Error(`Aucune donnée disponible pour ${spot.name}`);
             }
         }
@@ -937,27 +933,16 @@
             const lon = currentRegion === 'maroc' ? -9.697 : -17.4441;
             const now = new Date();
             const currentHour = now.getHours();
-            const cacheKey = `weather_${currentRegion}_${now.toISOString().split('T')[0]}`;
-            console.log(`Loading weather for ${currentRegion} at ${lat}, ${lon}`);
+            const dateStr = now.toISOString().split('T')[0];
+            const cacheKey = `weather_${currentRegion}_${dateStr}`;
+            console.log(`Loading weather for ${currentRegion} at ${lat}, ${lon} - Date: ${dateStr}`);
 
             try {
                 const weatherData = await fetchWithPriority(lat, lon, 'airTemperature,windSpeed,windDirection', currentRegion);
                 updateWeatherUI(weatherData);
             } catch (error) {
                 console.error(`Erreur météo pour ${currentRegion}:`, error);
-                const cachedData = localStorage.getItem(cacheKey);
-                if (cachedData) {
-                    const cached = JSON.parse(cachedData);
-                    const cachedDate = new Date(cached.timestamp || now).toISOString().split('T')[0];
-                    const currentDate = now.toISOString().split('T')[0];
-                    if (cachedDate === currentDate) {
-                        updateWeatherUI(cached);
-                    } else {
-                        document.getElementById('weatherContent').innerHTML = '<div class="loading"><p>Échec API Weatherbit, pas de données disponibles.</p></div>';
-                    }
-                } else {
-                    document.getElementById('weatherContent').innerHTML = '<div class="loading"><p>Échec API Weatherbit, pas de données disponibles.</p></div>';
-                }
+                document.getElementById('weatherContent').innerHTML = '<div class="loading"><p>Échec API Weatherbit, pas de données disponibles.</p></div>';
                 document.getElementById('weatherContent').classList.add('active');
             }
         }
@@ -1071,11 +1056,17 @@
                     <span class="weather-icon">💨</span>
                     <div class="weather-info">
                         <h3>Vent</h3>
-                        <p>${Math.round(data.windSpeed * 3.6)} km/h ${data.windDir}</p>
+                        <p>${Math.round(data.windSpeed * 3.6)} km/h ${getCardinalDirection(data.windDir)}</p>
                     </div>
                 </div>
             `;
             weatherContent.classList.add('active');
+        }
+
+        // Convertir direction en cardinal
+        function getCardinalDirection(angle) {
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            return directions[Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8];
         }
 
         // Auto-refresh every 30 minutes
