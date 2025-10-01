@@ -710,8 +710,8 @@
         
         <!-- Navigation -->
         <div class="tabs">
-            <button class="tab active" onclick="loadData('dakar')">Dakar, 30 Septembre 2025</button>
-            <button class="tab" onclick="loadData('maroc')">Maroc, 30 Septembre 2025</button>
+            <button class="tab active" onclick="loadData('dakar')">Dakar, 1 Octobre 2025</button>
+            <button class="tab" onclick="loadData('maroc')">Maroc, 1 Octobre 2025</button>
         </div>
         
         <!-- Weather -->
@@ -828,6 +828,15 @@
             const now = new Date();
             const hourOffset = now.getHours();
             const spotIndex = spotList.findIndex(s => s.name === spot.name);
+            const cacheKey = `spot_${spot.name}_${currentRegion}_${now.toISOString().split('T')[0]}`;
+            console.log(`Loading conditions for ${spot.name} at ${spot.lat}, ${spot.lon}`);
+
+            // Charger depuis le cache si disponible
+            const cachedSpot = localStorage.getItem(cacheKey);
+            if (cachedSpot) {
+                return JSON.parse(cachedSpot);
+            }
+
             try {
                 const stormglassData = await fetchWithFallback(
                     `https://api.stormglass.io/v2/weather/point?lat=${spot.lat}&lng=${spot.lon}&params=waveHeight,wavePeriod,windSpeed,windDirection&source=noaa&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}`,
@@ -859,7 +868,7 @@
                 const rating = score >= 80 ? 'excellent' : score >= 60 ? 'good' : score >= 40 ? 'fair' : 'poor';
                 const ratingText = score >= 80 ? 'Excellent' : score >= 60 ? 'Bon' : score >= 40 ? 'Moyen' : 'Mauvais';
 
-                return {
+                const conditions = {
                     height: waveHeight.toFixed(1),
                     period: wavePeriod.toFixed(1),
                     windSpeed: Math.round(windSpeed * 3.6),
@@ -872,20 +881,15 @@
                     dynamicDifficulty,
                     waveDirection: Math.round(spotFacing + (spotIndex * 5))
                 };
+                localStorage.setItem(cacheKey, JSON.stringify(conditions));
+                return conditions;
             } catch (error) {
                 console.error(`Erreur conditions ${spot.name}:`, error);
-                return {
-                    height: (0.75 + Math.random() * 0.5).toFixed(1),
-                    period: (8 + Math.random() * 2).toFixed(1),
-                    windSpeed: Math.round(10 + Math.random() * 10),
-                    windRelative: ['Onshore', 'Cross', 'Offshore'][Math.floor(Math.random() * 3)],
-                    temp: Math.round(28 + Math.random() * 2),
-                    score: Math.round(50 + Math.random() * 50),
-                    rating: 'good',
-                    ratingText: 'Bon',
-                    dynamicDifficulty: 'beginner',
-                    waveDirection: 220 + spotIndex * 3
-                };
+                const cachedData = localStorage.getItem(cacheKey);
+                if (cachedData) {
+                    return JSON.parse(cachedData);
+                }
+                throw new Error(`Aucune donnée disponible pour ${spot.name}`);
             }
         }
 
@@ -965,60 +969,65 @@
             const spotsContent = document.getElementById('spotsContent');
             spotsContent.innerHTML = '<div class="loading col-span-full"><div class="spinner"></div><p>Analyse conditions...</p></div>';
             
-            let spotsHtml = '';
-            for (const spot of spotList) {
-                const conditions = await generateSpotConditions(spot, spotList);
-                spotsHtml += `
-                    <div class="spot-card">
-                        <div class="spot-header">
-                            <h3 class="spot-title">${spot.name}</h3>
-                            <span class="spot-icon">${spot.icon}</span>
-                        </div>
-                        <span class="spot-difficulty difficulty-${conditions.dynamicDifficulty.toLowerCase()}">${conditions.dynamicDifficulty}</span>
-                        <p class="spot-description">${spot.description}</p>
-                        <div class="wave-conditions">
-                            <span class="wave-icon">🌊</span>
-                            <div>
-                                <p class="wave-height">${conditions.height}m</p>
-                                <p class="wave-period">${conditions.period}s</p>
+            try {
+                let spotsHtml = '';
+                for (const spot of spotList) {
+                    const conditions = await generateSpotConditions(spot, spotList);
+                    spotsHtml += `
+                        <div class="spot-card">
+                            <div class="spot-header">
+                                <h3 class="spot-title">${spot.name}</h3>
+                                <span class="spot-icon">${spot.icon}</span>
                             </div>
-                        </div>
-                        <div class="weather-conditions">
-                            <div class="weather-item">
-                                <span class="weather-icon">🌡️</span>
-                                <span class="weather-value">${conditions.temp}°</span>
-                                <span class="weather-label">Temp</span>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-icon">💨</span>
-                                <span class="weather-value">${conditions.windSpeed} km/h</span>
-                                <span class="weather-label">${conditions.windRelative}</span>
-                            </div>
-                        </div>
-                        <div class="wind-rose-container">
-                            <div class="wind-rose">
-                                <span class="wind-compass">N</span>
-                                <span class="wind-star animate"></span>
-                            </div>
-                            <div class="wind-details">
-                                <p><span class="label">Hauteur :</span> ${conditions.height}m</p>
-                                <p><span class="label">Période :</span> ${conditions.period}s</p>
-                                <p><span class="label">Vent :</span> ${conditions.windRelative}</p>
-                            </div>
-                        </div>
-                        <div class="rating-section">
-                            <p class="rating-title rating-${conditions.rating}">Note: ${conditions.ratingText}</p>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${conditions.score}%; background: ${conditions.rating === 'excellent' ? '#10b981' : conditions.rating === 'good' ? '#f59e0b' : conditions.rating === 'fair' ? '#f97316' : '#ef4444'}"></div>
+                            <span class="spot-difficulty difficulty-${conditions.dynamicDifficulty.toLowerCase()}">${conditions.dynamicDifficulty}</span>
+                            <p class="spot-description">${spot.description}</p>
+                            <div class="wave-conditions">
+                                <span class="wave-icon">🌊</span>
+                                <div>
+                                    <p class="wave-height">${conditions.height}m</p>
+                                    <p class="wave-period">${conditions.period}s</p>
                                 </div>
-                                <span class="progress-text">${conditions.score}/100</span>
+                            </div>
+                            <div class="weather-conditions">
+                                <div class="weather-item">
+                                    <span class="weather-icon">🌡️</span>
+                                    <span class="weather-value">${conditions.temp}°</span>
+                                    <span class="weather-label">Temp</span>
+                                </div>
+                                <div class="weather-item">
+                                    <span class="weather-icon">💨</span>
+                                    <span class="weather-value">${conditions.windSpeed} km/h</span>
+                                    <span class="weather-label">${conditions.windRelative}</span>
+                                </div>
+                            </div>
+                            <div class="wind-rose-container">
+                                <div class="wind-rose">
+                                    <span class="wind-compass">N</span>
+                                    <span class="wind-star animate"></span>
+                                </div>
+                                <div class="wind-details">
+                                    <p><span class="label">Hauteur :</span> ${conditions.height}m</p>
+                                    <p><span class="label">Période :</span> ${conditions.period}s</p>
+                                    <p><span class="label">Vent :</span> ${conditions.windRelative}</p>
+                                </div>
+                            </div>
+                            <div class="rating-section">
+                                <p class="rating-title rating-${conditions.rating}">Note: ${conditions.ratingText}</p>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${conditions.score}%; background: ${conditions.rating === 'excellent' ? '#10b981' : conditions.rating === 'good' ? '#f59e0b' : conditions.rating === 'fair' ? '#f97316' : '#ef4444'}"></div>
+                                    </div>
+                                    <span class="progress-text">${conditions.score}/100</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
+                spotsContent.innerHTML = spotsHtml;
+            } catch (error) {
+                console.error(`Erreur chargement spots:`, error);
+                spotsContent.innerHTML = '<div class="loading col-span-full"><p>Échec API, pas de données disponibles.</p></div>';
             }
-            spotsContent.innerHTML = spotsHtml;
             document.getElementById('spotsContent').classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
