@@ -748,7 +748,7 @@
             <div id="tidesContent" class="tide-grid glass-content">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Chargement marées via NOAA...</p>
+                    <p>Chargement marées via Stromglass...</p>
                 </div>
             </div>
             <div id="tidesStatus" class="text-sm text-center mt-2 opacity-70"></div>
@@ -773,7 +773,7 @@
         
         <!-- Footer -->
         <div class="glass text-center py-2">
-            <p class="text-sm opacity-70">Powered by Open-Meteo & NOAA • Données réelles</p>
+            <p class="text-sm opacity-70">Powered by Open-Meteo & Stromglass • Données réelles</p>
             <p class="text-xs opacity-60 mt-1" id="lastUpdate"></p>
         </div>
     </div>
@@ -871,29 +871,34 @@
             }
         }
 
-        // Fetch avec NOAA CO-OPS pour les marées (sans retry)
-        async function fetchWithNOAA(region) {
+        // Fetch avec Stromglass pour les marées (sans retry)
+        async function fetchWithStromglass(region) {
             if (!checkNetwork()) {
                 document.getElementById('tidesStatus').textContent = 'Pas de connexion internet';
                 return null;
             }
 
             try {
-                document.getElementById('tidesStatus').textContent = `Chargement NOAA pour ${region}...`;
-                const stationId = region === 'dakar' ? '9443001' : '9443002'; // 9443001 pour Dakar, 9443002 pour Essaouira (Maroc)
-                const noaaUrl = `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=${stationId}&product=predictions&datum=MLLW&units=metric&time_zone=gmt&application=SurfApp&format=json`;
-                const noaaResponse = await fetch(noaaUrl);
+                document.getElementById('tidesStatus').textContent = `Chargement Stromglass pour ${region}...`;
+                const lat = region === 'dakar' ? 14.6937 : 31.510; // Dakar ou Essaouira pour Maroc
+                const lon = region === 'dakar' ? -17.4441 : -9.770;
+                const stromglassUrl = `https://api.stromglass.io/v6/tide/extremes/point?lat=${lat}&lng=${lon}&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}&params=height`;
+                const stromglassResponse = await fetch(stromglassUrl, {
+                    headers: {
+                        'Authorization': '8a48d324-95a8-11f0-b0b8-0242ac130006-8a48d3e2-95a8-11f0-b0b8-0242ac130006'
+                    }
+                });
 
-                if (!noaaResponse.ok) {
-                    throw new Error(`Erreur NOAA: ${noaaResponse.status}`);
+                if (!stromglassResponse.ok) {
+                    throw new Error(`Erreur Stromglass: ${stromglassResponse.status}`);
                 }
 
-                const noaaData = await noaaResponse.json();
-                document.getElementById('tidesStatus').textContent = `Mise à jour NOAA réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-                return noaaData.predictions;
+                const stromglassData = await stromglassResponse.json();
+                document.getElementById('tidesStatus').textContent = `Mise à jour Stromglass réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                return stromglassData.data;
             } catch (error) {
-                console.error(`NOAA échoué: ${error.message}`);
-                document.getElementById('tidesStatus').textContent = `Échec API NOAA: ${error.message}`;
+                console.error(`Stromglass échoué: ${error.message}`);
+                document.getElementById('tidesStatus').textContent = `Échec API Stromglass: ${error.message}`;
                 return null;
             }
         }
@@ -971,15 +976,18 @@
 
         // Load Tides
         async function loadTides() {
-            const tideData = await fetchWithNOAA(currentRegion);
+            const tideData = await fetchWithStromglass(currentRegion);
             if (tideData && tideData.length > 0) {
-                const tidesHtml = tideData.slice(0, 2).map(tide => `
-                    <div class="tide-card">
-                        <p class="tide-type">${tide.v > 1 ? 'Haute' : 'Basse'} Mer</p>
-                        <p class="tide-time">${new Date(tide.t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="tide-height">${tide.v.toFixed(1)}m</p>
-                    </div>
-                `).join('');
+                const tidesHtml = tideData.slice(0, 2).map(tide => {
+                    const time = new Date(tide.time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="tide-card">
+                            <p class="tide-type">${tide.height > 1 ? 'Haute' : 'Basse'} Mer</p>
+                            <p class="tide-time">${time}</p>
+                            <p class="tide-height">${tide.height.toFixed(1)}m</p>
+                        </div>
+                    `;
+                }).join('');
                 document.getElementById('tidesContent').innerHTML = tidesHtml;
             } else {
                 // Fallback statique pour Dakar (basé sur prévisions du 2 oct. 2025)
@@ -998,7 +1006,7 @@
                     </div>
                 `).join('');
                 document.getElementById('tidesContent').innerHTML = tidesHtml;
-                document.getElementById('tidesStatus').textContent = 'Données NOAA indisponibles, mode fallback activé.';
+                document.getElementById('tidesStatus').textContent = 'Données Stromglass indisponibles, mode fallback activé.';
             }
             document.getElementById('tidesContent').classList.add('active');
         }
