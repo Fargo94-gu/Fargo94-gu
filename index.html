@@ -726,8 +726,8 @@
         
         <!-- Navigation -->
         <div class="tabs">
-            <button class="tab active" onclick="loadData('dakar')">Dakar, 1 Octobre 2025</button>
-            <button class="tab" onclick="loadData('maroc')">Maroc, 1 Octobre 2025</button>
+            <button class="tab active" onclick="loadData('dakar')">Dakar, 2 Octobre 2025</button>
+            <button class="tab" onclick="loadData('maroc')">Maroc, 2 Octobre 2025</button>
         </div>
         
         <!-- Weather -->
@@ -836,21 +836,17 @@
             return navigator.onLine;
         }
 
-        // Fetch avec Open-Meteo (1 tentative)
+        // Fetch avec Open-Meteo (sans retry)
         async function fetchWithOpenMeteo(lat, lon, region) {
             if (!checkNetwork()) {
                 document.getElementById('weatherStatus').textContent = 'Pas de connexion internet';
                 return null;
             }
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-
             try {
                 document.getElementById('weatherStatus').textContent = `Chargement Open-Meteo pour ${region}...`;
                 const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&wave_height=true`;
-                const openMeteoResponse = await fetch(openMeteoUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
+                const openMeteoResponse = await fetch(openMeteoUrl);
 
                 if (!openMeteoResponse.ok) {
                     throw new Error(`Erreur Open-Meteo: ${openMeteoResponse.status}`);
@@ -869,32 +865,27 @@
                 document.getElementById('weatherStatus').textContent = `Mise à jour Open-Meteo réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
                 return weatherData;
             } catch (error) {
-                clearTimeout(timeoutId);
                 console.error(`Open-Meteo échoué: ${error.message}`);
                 document.getElementById('weatherStatus').textContent = `Échec API Open-Meteo: ${error.message}`;
                 return null;
             }
         }
 
-        // Fetch avec Stromglass pour les marées (1 tentative)
+        // Fetch avec Stromglass pour les marées (sans retry)
         async function fetchWithStromglass(lat, lon, region) {
             if (!checkNetwork()) {
                 document.getElementById('tidesStatus').textContent = 'Pas de connexion internet';
                 return null;
             }
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
             const stromglassKey = '0ec6f6b6-9546-11f0-b41a-0242ac130006-0ec6f742-9546-11f0-b41a-0242ac130006';
 
             try {
                 document.getElementById('tidesStatus').textContent = `Chargement Stromglass pour ${region}...`;
                 const stromglassUrl = `https://api.stromglass.io/v6/tide/extremes?lat=${lat}&lng=${lon}&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}`;
                 const stromglassResponse = await fetch(stromglassUrl, {
-                    headers: { 'Authorization': stromglassKey },
-                    signal: controller.signal
+                    headers: { 'Authorization': stromglassKey }
                 });
-                clearTimeout(timeoutId);
 
                 if (!stromglassResponse.ok) {
                     throw new Error(`Erreur Stromglass: ${stromglassResponse.status}`);
@@ -904,7 +895,6 @@
                 document.getElementById('tidesStatus').textContent = `Mise à jour Stromglass réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
                 return stromglassData.data;
             } catch (error) {
-                clearTimeout(timeoutId);
                 console.error(`Stromglass échoué: ${error.message}`);
                 document.getElementById('tidesStatus').textContent = `Échec API Stromglass: ${error.message}`;
                 return null;
@@ -917,12 +907,8 @@
             console.log(`Loading conditions for ${spot.name} at ${spot.lat}, ${spot.lon}`);
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-
                 const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${spot.lat}&longitude=${spot.lon}&current_weather=true&wave_height=true`;
-                const openMeteoResponse = await fetch(openMeteoUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
+                const openMeteoResponse = await fetch(openMeteoUrl);
 
                 if (!openMeteoResponse.ok) {
                     throw new Error(`Erreur Open-Meteo: ${openMeteoResponse.status}`);
