@@ -726,8 +726,8 @@
         
         <!-- Navigation -->
         <div class="tabs">
-            <button class="tab active" onclick="loadData('dakar')">Dakar, 2 Octobre 2025</button>
-            <button class="tab" onclick="loadData('maroc')">Maroc, 2 Octobre 2025</button>
+            <button class="tab active" onclick="loadData('dakar')">Dakar, 5 Octobre 2025</button>
+            <button class="tab" onclick="loadData('maroc')">Maroc, 5 Octobre 2025</button>
         </div>
         
         <!-- Weather -->
@@ -748,7 +748,7 @@
             <div id="tidesContent" class="tide-grid glass-content">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Chargement marées via Stromglass...</p>
+                    <p>Chargement marées via WorldTides...</p>
                 </div>
             </div>
             <div id="tidesStatus" class="text-sm text-center mt-2 opacity-70"></div>
@@ -773,7 +773,7 @@
         
         <!-- Footer -->
         <div class="glass text-center py-2">
-            <p class="text-sm opacity-70">Powered by Open-Meteo & Stromglass • Données réelles</p>
+            <p class="text-sm opacity-70">Powered by Open-Meteo & WorldTides • Données réelles</p>
             <p class="text-xs opacity-60 mt-1" id="lastUpdate"></p>
         </div>
     </div>
@@ -871,34 +871,30 @@
             }
         }
 
-        // Fetch avec Stromglass pour les marées (sans retry)
-        async function fetchWithStromglass(region) {
+        // Fetch avec WorldTides pour les marées (sans retry)
+        async function fetchWithWorldTides(region) {
             if (!checkNetwork()) {
                 document.getElementById('tidesStatus').textContent = 'Pas de connexion internet';
                 return null;
             }
 
             try {
-                document.getElementById('tidesStatus').textContent = `Chargement Stromglass pour ${region}...`;
+                document.getElementById('tidesStatus').textContent = `Chargement WorldTides pour ${region}...`;
                 const lat = region === 'dakar' ? 14.6937 : 31.510; // Dakar ou Essaouira pour Maroc
                 const lon = region === 'dakar' ? -17.4441 : -9.770;
-                const stromglassUrl = `https://api.stromglass.io/v6/tide/extremes/point?lat=${lat}&lng=${lon}&start=${new Date().toISOString().split('T')[0]}&end=${new Date().toISOString().split('T')[0]}&params=height`;
-                const stromglassResponse = await fetch(stromglassUrl, {
-                    headers: {
-                        'Authorization': '8a48d324-95a8-11f0-b0b8-0242ac130006-8a48d3e2-95a8-11f0-b0b8-0242ac130006'
-                    }
-                });
+                const worldTidesUrl = `https://www.worldtides.info/v2/?lat=${lat}&lon=${lon}&days=1&key=c9e8d72d-ff14-406b-8a4a-2eddfd16b277`;
+                const worldTidesResponse = await fetch(worldTidesUrl);
 
-                if (!stromglassResponse.ok) {
-                    throw new Error(`Erreur Stromglass: ${stromglassResponse.status}`);
+                if (!worldTidesResponse.ok) {
+                    throw new Error(`Erreur WorldTides: ${worldTidesResponse.status}`);
                 }
 
-                const stromglassData = await stromglassResponse.json();
-                document.getElementById('tidesStatus').textContent = `Mise à jour Stromglass réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-                return stromglassData.data;
+                const worldTidesData = await worldTidesResponse.json();
+                document.getElementById('tidesStatus').textContent = `Mise à jour WorldTides réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+                return worldTidesData.extremes;
             } catch (error) {
-                console.error(`Stromglass échoué: ${error.message}`);
-                document.getElementById('tidesStatus').textContent = `Échec API Stromglass: ${error.message}`;
+                console.error(`WorldTides échoué: ${error.message}`);
+                document.getElementById('tidesStatus').textContent = `Échec API WorldTides: ${error.message}`;
                 return null;
             }
         }
@@ -976,13 +972,13 @@
 
         // Load Tides
         async function loadTides() {
-            const tideData = await fetchWithStromglass(currentRegion);
+            const tideData = await fetchWithWorldTides(currentRegion);
             if (tideData && tideData.length > 0) {
                 const tidesHtml = tideData.slice(0, 2).map(tide => {
-                    const time = new Date(tide.time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    const time = new Date(tide.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                     return `
                         <div class="tide-card">
-                            <p class="tide-type">${tide.height > 1 ? 'Haute' : 'Basse'} Mer</p>
+                            <p class="tide-type">${tide.type === 'High' ? 'Haute' : 'Basse'} Mer</p>
                             <p class="tide-time">${time}</p>
                             <p class="tide-height">${tide.height.toFixed(1)}m</p>
                         </div>
@@ -990,13 +986,13 @@
                 }).join('');
                 document.getElementById('tidesContent').innerHTML = tidesHtml;
             } else {
-                // Fallback statique pour Dakar (basé sur prévisions du 2 oct. 2025)
+                // Fallback statique pour le 5 octobre 2025 (approximation basée sur tendances)
                 const fallbackTides = currentRegion === 'dakar' ? [
-                    { type: 'Haute', time: '04:48', height: 1.35 },
-                    { type: 'Basse', time: '11:04', height: 0.73 }
+                    { type: 'Haute', time: '05:15', height: 1.40 },
+                    { type: 'Basse', time: '11:30', height: 0.70 }
                 ] : [
-                    { type: 'Haute', time: '05:10', height: 2.10 },
-                    { type: 'Basse', time: '11:30', height: 1.00 }
+                    { type: 'Haute', time: '05:45', height: 2.15 },
+                    { type: 'Basse', time: '12:00', height: 1.05 }
                 ];
                 const tidesHtml = fallbackTides.map(tide => `
                     <div class="tide-card">
@@ -1006,7 +1002,7 @@
                     </div>
                 `).join('');
                 document.getElementById('tidesContent').innerHTML = tidesHtml;
-                document.getElementById('tidesStatus').textContent = 'Données Stromglass indisponibles, mode fallback activé.';
+                document.getElementById('tidesStatus').textContent = 'Données WorldTides indisponibles, mode fallback activé.';
             }
             document.getElementById('tidesContent').classList.add('active');
         }
