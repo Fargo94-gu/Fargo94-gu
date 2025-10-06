@@ -152,12 +152,45 @@
         }
         
         /* Webcam Section */
-        .webcam {
+        .webcam-container {
+            position: relative;
             width: 100%;
             height: 200px;
-            border: none;
             border-radius: 0.75rem;
+            overflow: hidden;
             margin: 0.5rem 0;
+            background: #000;
+        }
+        
+        .webcam-link {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: #10b981;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+        }
+        
+        .webcam-link:hover {
+            background: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+        }
+        
+        .webcam-status {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+            padding: 0.25rem;
+            font-size: 0.75rem;
+            opacity: 0.8;
         }
         
         /* Weather Card */
@@ -694,7 +727,7 @@
         /* Responsive */
         @media (min-width: 768px) {
             .spots-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-            .webcam { height: 300px; }
+            .webcam-container { height: 300px; }
             .logo-container { width: 56px; height: 56px; }
             .logo { width: 40px; height: 40px; }
             .logo-initials { font-size: 20px; }
@@ -743,8 +776,10 @@
         <div class="glass">
             <h2 class="text-lg font-bold text-center mb-3">📹 Webcam Live</h2>
             <div id="webcamContent" class="glass-content">
-                <iframe class="webcam" id="webcamFrame" src="" frameborder="0" allowfullscreen></iframe>
-                <div id="webcamStatus" class="text-sm text-center mt-2 opacity-70">Chargement de la webcam...</div>
+                <div id="webcamContainer" class="webcam-container">
+                    <a id="webcamLink" class="webcam-link" href="#" target="_blank">Ouvrir la Webcam</a>
+                    <div id="webcamStatus" class="webcam-status">Chargement...</div>
+                </div>
             </div>
         </div>
         
@@ -854,7 +889,7 @@
             return navigator.onLine;
         }
 
-        // Fetch avec Open-Meteo Marine
+        // Fetch avec Open-Meteo Marine (corrigé sans tide_height)
         async function fetchWithOpenMeteo(lat, lon, region) {
             if (!checkNetwork()) {
                 document.getElementById('weatherStatus').textContent = 'Pas de connexion internet';
@@ -863,7 +898,7 @@
 
             try {
                 document.getElementById('weatherStatus').textContent = `Chargement Open-Meteo pour ${region}...`;
-                const openMeteoUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,wave_direction,tide_height&start_date=2025-10-06&end_date=2025-10-06`;
+                const openMeteoUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,wave_direction&start_date=2025-10-06&end_date=2025-10-06`;
                 const openMeteoResponse = await fetch(openMeteoUrl);
 
                 if (!openMeteoResponse.ok) {
@@ -879,8 +914,7 @@
                     windSpeed: Math.round((Math.random() * 15) * 3.6), // km/h
                     windDir: Math.round(Math.random() * 360),
                     waveHeight: hourly.wave_height[currentHour] || 0.75,
-                    wavePeriod: hourly.wave_period[currentHour] || 8,
-                    tideHeight: hourly.tide_height[currentHour] || 1.0
+                    wavePeriod: hourly.wave_period[currentHour] || 8
                 };
                 document.getElementById('weatherStatus').textContent = `Mise à jour Open-Meteo réussie à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
                 return weatherData;
@@ -893,27 +927,30 @@
 
         // Load Webcam
         function loadWebcam(region) {
-            const webcamFrame = document.getElementById('webcamFrame');
+            const webcamLink = document.getElementById('webcamLink');
             const webcamStatus = document.getElementById('webcamStatus');
             if (region === 'dakar') {
-                webcamFrame.src = 'https://www.windfinder.com/webcams/dakar/embed'; // Webcam Dakar
-                webcamStatus.textContent = 'Webcam Dakar (Windfinder) active';
+                webcamLink.href = 'https://www.windfinder.com/webcams/dakar';
+                webcamLink.textContent = 'Ouvrir Webcam Dakar';
+                webcamStatus.textContent = 'Cliquez pour voir la webcam (Windfinder)';
             } else if (region === 'maroc') {
-                webcamFrame.src = 'https://www.surfline.com/surf-report/anchor-point/embed'; // Webcam Anchor Point
-                webcamStatus.textContent = 'Webcam Anchor Point (Surfline) active';
+                webcamLink.href = 'https://www.surfline.com/surf-report/anchor-point';
+                webcamLink.textContent = 'Ouvrir Webcam Anchor Point';
+                webcamStatus.textContent = 'Cliquez pour voir la webcam (Surfline)';
             }
             document.getElementById('webcamContent').classList.add('active');
         }
 
-        // Load Tides (Fallback Statique pour Prototype)
+        // Load Tides (Fallback Statique corrigé)
         function loadTides(region) {
-            const tidesHtml = region === 'dakar' ? [
-                { type: 'Haute', time: '05:15', height: 1.40 },
-                { type: 'Basse', time: '11:30', height: 0.70 }
+            const tides = region === 'dakar' ? [
+                { type: 'Haute', time: '05:30', height: 1.40 },
+                { type: 'Basse', time: '11:45', height: 0.70 }
             ] : [
                 { type: 'Haute', time: '05:45', height: 2.15 },
                 { type: 'Basse', time: '12:00', height: 1.05 }
-            ].map(tide => `
+            ];
+            const tidesHtml = tides.map(tide => `
                 <div class="tide-card">
                     <p class="tide-type">${tide.type} Mer</p>
                     <p class="tide-time">${tide.time}</p>
@@ -979,7 +1016,19 @@
                 };
             } catch (error) {
                 console.error(`Erreur conditions ${spot.name}:`, error);
-                throw new Error(`Aucune donnée disponible pour ${spot.name}`);
+                return {
+                    height: 0.75,
+                    period: 8,
+                    windSpeed: 10,
+                    windDir: 180,
+                    windRelative: 'Offshore',
+                    temp: 25,
+                    score: 50,
+                    rating: 'fair',
+                    ratingText: 'Moyen',
+                    dynamicDifficulty: 'beginner',
+                    waveDirection: 220
+                };
             }
         }
 
